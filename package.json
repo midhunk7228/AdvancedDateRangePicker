@@ -8,10 +8,14 @@
   "style": "dist/advanced-date-range-picker.css",
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts",
-      "style": "./dist/advanced-date-range-picker.css"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./dist/advanced-date-range-picker.css": "./dist/advanced-date-range-picker.css"
   },

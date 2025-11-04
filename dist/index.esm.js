@@ -1,6 +1,5 @@
 import { jsxs as x, jsx as u, Fragment as ct } from "react/jsx-runtime";
 import N, { createContext as wr, useContext as xr, useCallback as ye, useRef as ke, useLayoutEffect as vr, useState as A, useEffect as We, useMemo as Ut, forwardRef as _n, createElement as Gt } from "react";
-import "react-day-picker/dist/style.css";
 function kr(e, t, n = "long") {
   return new Intl.DateTimeFormat("en-US", {
     // Enforces engine to render the time. Without the option JavaScriptCore omits it.
@@ -3371,7 +3370,7 @@ function Ni(e, t, n) {
   const r = yr(t, e, !0), s = new Date(e.getTime() - r), o = /* @__PURE__ */ new Date(0);
   return o.setFullYear(s.getUTCFullYear(), s.getUTCMonth(), s.getUTCDate()), o.setHours(s.getUTCHours(), s.getUTCMinutes(), s.getUTCSeconds(), s.getUTCMilliseconds()), o;
 }
-const Jt = 0, Zi = !1, Je = !0, zi = "firstFullWeek", Si = "UTC";
+const Jt = 0, Li = !1, Je = !0, Zi = "firstFullWeek", Si = "UTC";
 function U(e) {
   const t = Ls(`${e}T00:00:00.000Z`);
   return Ni(t, Si);
@@ -3490,11 +3489,11 @@ function Yn(e, t, n = "day", r = [], s, o, a, i, c) {
   };
   return s !== void 0 && (d.excludeEnabled = s), o && (d.excludeFilterTypes = o), a && (d.excludedSpecificDates = a), i && (d.excludedSavedDates = i), c && (d.excludedDateRanges = c), d;
 }
-function Qi(e) {
+function zi(e) {
   const [t, n, r] = e.split("-");
   return `${r}/${n}/${t}`;
 }
-function Vi(e) {
+function Qi(e) {
   const t = e.split("/");
   if (t.length !== 3) return null;
   const [n, r, s] = t, o = parseInt(r, 10), a = parseInt(n, 10), i = parseInt(s, 10);
@@ -4231,7 +4230,7 @@ const Hi = [
   "Nov",
   "Dec"
 ];
-function Gi({
+function Vi({
   initialSelection: e,
   onApply: t,
   onCancel: n
@@ -5348,19 +5347,19 @@ function Gi({
 }
 export {
   Je as ALLOW_FUTURE_DATES,
-  Gi as AdvancedDateRangePicker,
-  Zi as CONSTRAIN_WEEK_TO_CURRENT_MONTH,
-  zi as WEEK_NUMBERING_MODE,
+  Vi as AdvancedDateRangePicker,
+  Li as CONSTRAIN_WEEK_TO_CURRENT_MONTH,
+  Zi as WEEK_NUMBERING_MODE,
   Jt as WEEK_STARTS_ON,
   br as calcDurationFromRange,
   Ci as calcEndFromDuration,
   Ti as calcStartFromDuration,
   Yn as createSelection,
-  Qi as formatDisplayDate,
+  zi as formatDisplayDate,
   G as formatUtc,
   Ei as getPresets,
   Nt as getTodayUtc,
   Yi as getUnitAbbreviation,
-  Vi as parseDisplayDate,
+  Qi as parseDisplayDate,
   U as parseUtc
 };
