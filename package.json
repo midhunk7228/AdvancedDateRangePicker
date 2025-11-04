@@ -1,0 +1,45 @@
+{
+  "name": "advanced-date-range-picker",
+  "version": "1.0.0",
+  "description": "An advanced, feature-rich React date range picker component with presets, saved dates, and exclusion filters",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "react",
+    "date-range-picker",
+    "date-picker",
+    "calendar",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "lucide-react": "^0.544.0",
+    "react-day-picker": "^9.11.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react-swc": "^4.1.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.7",
+    "vite-plugin-dts": "^4.3.0"
+  }
+}
+
