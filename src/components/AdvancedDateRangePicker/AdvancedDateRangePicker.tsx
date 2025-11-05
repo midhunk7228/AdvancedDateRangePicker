@@ -981,7 +981,10 @@ export default function AdvancedDateRangePicker({
   }, [unit, displayedMonth, monthsViewIndex, yearsViewIndex]);
 
   return (
-    <div className="flex gap-4 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden max-h-[85vh]">
+    <div
+      className="flex gap-4 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden max-h-[85vh]"
+      style={themeColors}
+    >
       {/* Left Sidebar: Presets and Saved Dates */}
       <PresetSidebar
         onPresetSelect={handlePresetSelect}
@@ -997,7 +1000,6 @@ export default function AdvancedDateRangePicker({
           excludedSavedDates,
           excludedDateRanges
         )}
-        themeColors={themeColors}
       />
 
       {/* Main Content */}

@@ -8,22 +8,6 @@ interface PresetSidebarProps {
   onPresetSelect: (startDate: string, endDate: string) => void;
   onSavedDateSelect?: (selection: DateRangeSelection) => void;
   currentSelection: DateRangeSelection;
-  themeColors?: {
-    background: string;
-    surface: string;
-    surfaceSecondary: string;
-    text: string;
-    textSecondary: string;
-    textMuted: string;
-    border: string;
-    primary: string;
-    primaryHover: string;
-    secondary: string;
-    accent: string;
-    error: string;
-    warning: string;
-    success: string;
-  };
 }
 
 const SAVED_DATES_KEY = "savedDateRanges";
@@ -32,7 +16,6 @@ export default function PresetSidebar({
   onPresetSelect,
   onSavedDateSelect,
   currentSelection,
-  themeColors,
 }: PresetSidebarProps) {
   const [savedDates, setSavedDates] = useState<SavedDateRange[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -117,10 +100,7 @@ export default function PresetSidebar({
   };
 
   return (
-    <div
-      className="w-72 bg-white border-r border-gray-200 py-4 flex flex-col "
-      style={themeColors}
-    >
+    <div className="w-72 bg-white border-r border-gray-200 py-4 flex flex-col ">
       {/* Default Presets */}
       <div className="mb-3 px-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-2">
