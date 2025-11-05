@@ -52,6 +52,22 @@ interface AdvancedDateRangePickerProps {
   initialSelection?: Partial<DateRangeSelection>;
   onApply: (selection: DateRangeSelection) => void;
   onCancel: () => void;
+  themeColors?: {
+    background: string;
+    surface: string;
+    surfaceSecondary: string;
+    text: string;
+    textSecondary: string;
+    textMuted: string;
+    border: string;
+    primary: string;
+    primaryHover: string;
+    secondary: string;
+    accent: string;
+    error: string;
+    warning: string;
+    success: string;
+  };
 }
 
 const WEEKDAY_LABELS = [
@@ -83,6 +99,7 @@ export default function AdvancedDateRangePicker({
   initialSelection,
   onApply,
   onCancel,
+  themeColors,
 }: AdvancedDateRangePickerProps) {
   const today = getTodayUtc();
 
@@ -980,6 +997,7 @@ export default function AdvancedDateRangePicker({
           excludedSavedDates,
           excludedDateRanges
         )}
+        themeColors={themeColors}
       />
 
       {/* Main Content */}
