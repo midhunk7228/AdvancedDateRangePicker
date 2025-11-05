@@ -3,8 +3,6 @@
  * Uses IndexedDB to store saved date ranges
  */
 
-import type { SavedDateRange } from "../types/dateRange";
-
 const DB_NAME = "DateRangePickerDB";
 const DB_VERSION = 1;
 const STORE_NAME = "savedDateRanges";
@@ -134,4 +132,3 @@ class StorageService {
 
 // Export singleton instance
 export const storageService = new StorageService();
-

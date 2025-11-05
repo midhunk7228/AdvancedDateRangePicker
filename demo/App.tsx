@@ -1,10 +1,6 @@
-import React, { useState } from "react";
-import {
-  AdvancedDateRangePicker,
-  DateRangeSelection,
-} from "advanced-date-range-picker";
-// Import the CSS file
-import "advanced-date-range-picker/dist/advanced-date-range-picker.css";
+import { useState } from "react";
+import AdvancedDateRangePicker from "../src/components/AdvancedDateRangePicker/AdvancedDateRangePicker";
+import type { DateRangeSelection } from "../src/types/dateRange";
 
 function App() {
   const [showPicker, setShowPicker] = useState(false);
