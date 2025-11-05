@@ -438,7 +438,13 @@ export default function AdvancedDateRangePicker({
   ) => {
     if (startDateUtc && endDateUtc && range?.to) {
       setStartDateUtc(formatUtc(dayPickerProps));
-      if (dayPickerProps > parseUtc(endDateUtc)) {
+      console.log(
+        "dayPickerProps",
+        dayPickerProps,
+        "parseUtc(endDateUtc)",
+        parseUtc(endDateUtc)
+      );
+      if (dayPickerProps.getTime() > parseUtc(endDateUtc).getTime()) {
         setEndDateUtc("");
       }
       return;
