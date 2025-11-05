@@ -209,7 +209,9 @@ export default function AdvancedDateRangePicker({
   useEffect(() => {
     const loadSavedDates = async () => {
       await storageService.init();
-      const data = await storageService.getData<SavedDateRange[]>("savedDateRanges");
+      const data = await storageService.getData<SavedDateRange[]>(
+        "savedDateRanges"
+      );
       if (data) {
         setSavedDatesForFilter(data);
       }
@@ -417,6 +419,37 @@ export default function AdvancedDateRangePicker({
   const handleCalendarSelect = (
     range: { from?: Date; to?: Date } | undefined
   ) => {
+    if (range?.from) {
+      const newStart = formatUtc(range.from);
+      setStartDateUtc(newStart);
+
+      if (range?.to) {
+        const newEnd = formatUtc(range.to);
+        setEndDateUtc(newEnd);
+      } else {
+        setEndDateUtc(newStart);
+      }
+    }
+  };
+
+  const handleResetCalendarSelect = (
+    range: { from?: Date; to?: Date } | undefined,
+    dayPickerProps: Date
+  ) => {
+    if (startDateUtc && endDateUtc && range?.to) {
+      setStartDateUtc(formatUtc(dayPickerProps));
+      setEndDateUtc("");
+      return;
+    }
+    if (!startDateUtc && endDateUtc && range?.from) {
+      setEndDateUtc(formatUtc(range?.from));
+      return;
+    }
+    if (!startDateUtc && !endDateUtc && range?.from) {
+      setStartDateUtc(formatUtc(range?.from));
+      setEndDateUtc("");
+      return;
+    }
     if (range?.from) {
       const newStart = formatUtc(range.from);
       setStartDateUtc(newStart);
@@ -1598,7 +1631,9 @@ export default function AdvancedDateRangePicker({
                       mode="range"
                       navLayout="around"
                       selected={selectedRange}
-                      onSelect={handleCalendarSelect}
+                      onSelect={(range, _dayPickerProps) => {
+                        handleResetCalendarSelect(range, _dayPickerProps);
+                      }}
                       month={displayedMonth}
                       onMonthChange={setDisplayedMonth}
                       numberOfMonths={2}
