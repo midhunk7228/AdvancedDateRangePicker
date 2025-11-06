@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import type { CSSProperties } from "react";
 import { DayPicker } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
 import "react-day-picker/dist/style.css";
@@ -95,6 +96,10 @@ const MONTHS = [
   "Dec",
 ];
 
+// Consumers can override the fixed container height by defining the
+// `--adrp-container-height` CSS custom property on a parent element.
+const DEFAULT_PICKER_HEIGHT = "var(--adrp-container-height, min(720px, 85vh))";
+
 export default function AdvancedDateRangePicker({
   initialSelection,
   onApply,
@@ -102,6 +107,14 @@ export default function AdvancedDateRangePicker({
   themeColors,
 }: AdvancedDateRangePickerProps) {
   const today = getTodayUtc();
+
+  const containerStyle: CSSProperties = {
+    height: DEFAULT_PICKER_HEIGHT,
+    minHeight: DEFAULT_PICKER_HEIGHT,
+    maxHeight: DEFAULT_PICKER_HEIGHT,
+    overflow: "hidden",
+    ...themeColors,
+  };
 
   // Initialize state
   const [unit, setUnit] = useState<DateRangeUnit>(
@@ -982,8 +995,8 @@ export default function AdvancedDateRangePicker({
 
   return (
     <div
-      className="flex gap-4 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden max-h-[85vh]"
-      style={themeColors}
+      className="flex gap-4 bg-white rounded-lg shadow-xl border border-gray-200"
+      style={containerStyle}
     >
       {/* Left Sidebar: Presets and Saved Dates */}
       <PresetSidebar
@@ -1000,6 +1013,7 @@ export default function AdvancedDateRangePicker({
           excludedSavedDates,
           excludedDateRanges
         )}
+        themeColors={themeColors}
       />
 
       {/* Main Content */}
