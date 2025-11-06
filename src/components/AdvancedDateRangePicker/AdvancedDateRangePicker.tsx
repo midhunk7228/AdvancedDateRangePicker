@@ -132,6 +132,17 @@ export default function AdvancedDateRangePicker({
   const [endDateUtc, setEndDateUtc] = useState(
     initialSelection?.endDateUtc || today
   );
+  const [activeDateField, setActiveDateField] = useState<"start" | "end">(
+    () => {
+      if (initialSelection?.startDateUtc && !initialSelection?.endDateUtc) {
+        return "end";
+      }
+      if (!initialSelection?.startDateUtc && initialSelection?.endDateUtc) {
+        return "start";
+      }
+      return "start";
+    }
+  );
   const [duration, setDuration] = useState(initialSelection?.duration || 1);
   const [excludedWeekdays, setExcludedWeekdays] = useState<number[]>(
     initialSelection?.excludedWeekdays || []
@@ -255,8 +266,17 @@ export default function AdvancedDateRangePicker({
     loadSavedDates();
   }, []);
 
+  useEffect(() => {
+    if (startDateUtc && !endDateUtc) {
+      setActiveDateField("end");
+    } else if (!startDateUtc && endDateUtc) {
+      setActiveDateField("start");
+    }
+  }, [startDateUtc, endDateUtc]);
+
   const handleStartDateChange = (value: string) => {
     setStartDateUtc(value);
+    setActiveDateField(value ? "end" : "start");
     // If new start is after end, adjust end (only if both dates are valid)
     if (value && endDateUtc && parseUtc(value) > parseUtc(endDateUtc)) {
       setEndDateUtc(value);
@@ -269,6 +289,7 @@ export default function AdvancedDateRangePicker({
 
   const handleEndDateChange = (value: string) => {
     setEndDateUtc(value);
+    setActiveDateField(value ? "start" : "end");
     // If new end is before start, adjust start (only if both dates are valid)
     if (value && startDateUtc && parseUtc(value) < parseUtc(startDateUtc)) {
       setStartDateUtc(value);
@@ -330,6 +351,7 @@ export default function AdvancedDateRangePicker({
       setDisplayedMonth(startOfMonth(parseUtc(newStartDate)));
     }
     // If neither exists, do nothing (handled by input being disabled or validation)
+    setActiveDateField("start");
   };
 
   const handleUnitChange = (newUnit: DateRangeUnit) => {
@@ -347,6 +369,7 @@ export default function AdvancedDateRangePicker({
   const handlePresetSelect = (startDate: string, endDate: string) => {
     setStartDateUtc(startDate);
     setEndDateUtc(endDate);
+    setActiveDateField("start");
     // Navigate calendar to show the month of the start date
     if (startDate) {
       setDisplayedMonth(startOfMonth(parseUtc(startDate)));
@@ -359,6 +382,7 @@ export default function AdvancedDateRangePicker({
     setUnit(selection.unit);
     setExcludedWeekdays(selection.excludedWeekdays);
     setDuration(selection.duration);
+    setActiveDateField("start");
 
     // Restore exclude filter state
     if (selection.excludeEnabled !== undefined) {
@@ -395,6 +419,7 @@ export default function AdvancedDateRangePicker({
     setStartDateUtc(today);
     setEndDateUtc(today);
     setExcludedWeekdays([]);
+    setActiveDateField("start");
     // Navigate calendar to show the current month
     setDisplayedMonth(startOfMonth(parseUtc(today)));
   };
@@ -405,6 +430,7 @@ export default function AdvancedDateRangePicker({
     setDuration(1);
     setUnit("day");
     setExcludedWeekdays([]);
+    setActiveDateField("start");
 
     // Clear all exclude filters
     setExcludeEnabled(false);
@@ -462,8 +488,10 @@ export default function AdvancedDateRangePicker({
       if (range?.to) {
         const newEnd = formatUtc(range.to);
         setEndDateUtc(newEnd);
+        setActiveDateField("start");
       } else {
         setEndDateUtc(newStart);
+        setActiveDateField("end");
       }
     }
   };
@@ -473,25 +501,23 @@ export default function AdvancedDateRangePicker({
     dayPickerProps: Date
   ) => {
     if (startDateUtc && endDateUtc && range?.to) {
-      setStartDateUtc(formatUtc(dayPickerProps));
-      console.log(
-        "dayPickerProps",
-        dayPickerProps,
-        "parseUtc(endDateUtc)",
-        parseUtc(endDateUtc)
-      );
+      const nextStart = formatUtc(dayPickerProps);
+      setStartDateUtc(nextStart);
       if (dayPickerProps.getTime() > parseUtc(endDateUtc).getTime()) {
         setEndDateUtc("");
       }
+      setActiveDateField("end");
       return;
     }
     if (!startDateUtc && endDateUtc && range?.from) {
       setEndDateUtc(formatUtc(range?.from));
+      setActiveDateField("start");
       return;
     }
     if (!startDateUtc && !endDateUtc && range?.from) {
       setStartDateUtc(formatUtc(range?.from));
       setEndDateUtc("");
+      setActiveDateField("end");
       return;
     }
     if (range?.from) {
@@ -501,8 +527,10 @@ export default function AdvancedDateRangePicker({
       if (range?.to) {
         const newEnd = formatUtc(range.to);
         setEndDateUtc(newEnd);
+        setActiveDateField("start");
       } else {
         setEndDateUtc(newStart);
+        setActiveDateField("end");
       }
     }
   };
@@ -1047,25 +1075,45 @@ export default function AdvancedDateRangePicker({
           {/* Date Inputs Row */}
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label
+                className={`block text-xs font-medium mb-1 ${
+                  activeDateField === "start"
+                    ? "text-blue-600"
+                    : "text-gray-600"
+                }`}
+              >
                 Start Date
               </label>
               <DateInput
                 value={startDateUtc}
                 onChange={handleStartDateChange}
                 placeholder="DD/MM/YYYY"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onFocus={() => setActiveDateField("start")}
+                className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  activeDateField === "start"
+                    ? "border-blue-500"
+                    : "border-gray-300"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label
+                className={`block text-xs font-medium mb-1 ${
+                  activeDateField === "end" ? "text-blue-600" : "text-gray-600"
+                }`}
+              >
                 End Date
               </label>
               <DateInput
                 value={endDateUtc}
                 onChange={handleEndDateChange}
                 placeholder="DD/MM/YYYY"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onFocus={() => setActiveDateField("end")}
+                className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  activeDateField === "end"
+                    ? "border-blue-500"
+                    : "border-gray-300"
+                }`}
               />
             </div>
             <div>

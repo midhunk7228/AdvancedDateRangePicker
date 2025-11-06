@@ -5,6 +5,7 @@ interface DateInputProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 export default function DateInput({
@@ -12,6 +13,7 @@ export default function DateInput({
   onChange,
   placeholder = "DD/MM/YYYY",
   className = "",
+  onFocus,
 }: DateInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [displayValue, setDisplayValue] = useState("");
@@ -324,6 +326,11 @@ export default function DateInput({
       value={displayValue}
       onChange={handleChange}
       onBlur={handleBlur}
+      onFocus={(event) => {
+        if (onFocus) {
+          onFocus(event);
+        }
+      }}
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
       maxLength={10}
@@ -331,4 +338,3 @@ export default function DateInput({
     />
   );
 }
-
