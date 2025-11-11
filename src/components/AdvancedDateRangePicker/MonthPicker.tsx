@@ -1,13 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { parseUtc, getTodayUtc } from "../../utils/dateRange";
-import { getMonth, getYear, setMonth, setYear, startOfMonth } from "date-fns";
+import {
+  endOfMonth,
+  getMonth,
+  getYear,
+  setMonth,
+  setYear,
+  startOfMonth,
+} from "date-fns";
 import { ALLOW_FUTURE_DATES } from "../../config/dateConfig";
 
 interface MonthPickerProps {
-  selectedRange: { from: Date; to: Date };
+  selectedRange: { from?: Date; to?: Date };
   onSelect: (range: { from?: Date; to?: Date } | undefined) => void;
 }
+
+type MonthRange = { from?: Date; to?: Date };
+
+const normalizeRange = (range: MonthRange | undefined): MonthRange => {
+  const normalizedFrom = range?.from ? startOfMonth(range.from) : undefined;
+  const normalizedTo = range?.to ? endOfMonth(range.to) : undefined;
+
+  if (
+    normalizedFrom &&
+    normalizedTo &&
+    normalizedTo.getTime() < normalizedFrom.getTime()
+  ) {
+    return { from: normalizedFrom, to: endOfMonth(normalizedFrom) };
+  }
+
+  return { from: normalizedFrom, to: normalizedTo };
+};
 
 const MONTHS = [
   "Jan",
@@ -28,44 +52,95 @@ export default function MonthPicker({
   selectedRange,
   onSelect,
 }: MonthPickerProps) {
-  // Get the starting year from selected range or current year
-  const selectedStartYear = getYear(selectedRange.from);
-  const [displayYear, setDisplayYear] = useState(selectedStartYear);
   const today = parseUtc(getTodayUtc());
+  const initialRange = normalizeRange(selectedRange);
+  const initialYear = initialRange.from
+    ? getYear(initialRange.from)
+    : getYear(today);
+
+  const [monthRange, setMonthRange] = useState<MonthRange>(initialRange);
+  // Get the starting year from selected range or current year
+  const [displayYear, setDisplayYear] = useState(initialYear);
+  const [isSelectingEnd, setIsSelectingEnd] = useState(false);
+
+  useEffect(() => {
+    const normalized = normalizeRange(selectedRange);
+
+    setMonthRange((current) => {
+      const currentFromTime = current.from?.getTime() ?? null;
+      const currentToTime = current.to?.getTime() ?? null;
+      const normalizedFromTime = normalized.from?.getTime() ?? null;
+      const normalizedToTime = normalized.to?.getTime() ?? null;
+
+      const sameFrom = currentFromTime === normalizedFromTime;
+      const sameTo = currentToTime === normalizedToTime;
+
+      if (sameFrom && sameTo) {
+        return current;
+      }
+
+      setIsSelectingEnd(false);
+
+      if (normalized.from) {
+        const normalizedYear = getYear(normalized.from);
+        setDisplayYear((currentDisplayYear) => {
+          if (
+            currentDisplayYear === normalizedYear ||
+            currentDisplayYear === normalizedYear - 1
+          ) {
+            return currentDisplayYear;
+          }
+          return normalizedYear;
+        });
+      }
+
+      return normalized;
+    });
+  }, [selectedRange]);
 
   const handleMonthClick = (year: number, monthIndex: number) => {
     const clickedDate = setMonth(setYear(new Date(), year), monthIndex);
+    const monthStart = startOfMonth(clickedDate);
+    const monthEnd = endOfMonth(clickedDate);
 
     // If no selection exists, start a new range
-    if (!selectedRange.from) {
-      onSelect({ from: clickedDate, to: clickedDate });
+    if (!monthRange.from || !monthRange.to || !isSelectingEnd) {
+      const nextRange: MonthRange = { from: monthStart, to: monthEnd };
+      setMonthRange(nextRange);
+      setIsSelectingEnd(true);
+      onSelect(nextRange);
       return;
     }
 
     // If we have a from but no to (or from === to), set the to
-    if (
-      !selectedRange.to ||
-      selectedRange.from.getTime() === selectedRange.to.getTime()
-    ) {
-      if (clickedDate < selectedRange.from) {
-        onSelect({ from: clickedDate, to: selectedRange.from });
+    if (isSelectingEnd) {
+      let nextRange: MonthRange;
+
+      if (monthStart.getTime() < monthRange.from.getTime()) {
+        nextRange = { from: monthStart, to: monthRange.to };
       } else {
-        onSelect({ from: selectedRange.from, to: clickedDate });
+        nextRange = { from: monthRange.from, to: monthEnd };
       }
+      setMonthRange(nextRange);
+      setIsSelectingEnd(false);
+      onSelect(nextRange);
       return;
     }
 
     // If we already have a range, start a new selection
-    onSelect({ from: clickedDate, to: clickedDate });
+    const nextRange: MonthRange = { from: monthStart, to: monthEnd };
+    setMonthRange(nextRange);
+    setIsSelectingEnd(true);
+    onSelect(nextRange);
   };
 
   const isMonthInRange = (year: number, monthIndex: number): boolean => {
-    if (!selectedRange.from || !selectedRange.to) return false;
+    if (!monthRange.from || !monthRange.to) return false;
 
-    const fromMonth = getMonth(selectedRange.from);
-    const fromYear = getYear(selectedRange.from);
-    const toMonth = getMonth(selectedRange.to);
-    const toYear = getYear(selectedRange.to);
+    const fromMonth = getMonth(monthRange.from);
+    const fromYear = getYear(monthRange.from);
+    const toMonth = getMonth(monthRange.to);
+    const toYear = getYear(monthRange.to);
 
     const currentYearMonth = year * 12 + monthIndex;
     const fromYearMonth = fromYear * 12 + fromMonth;
@@ -75,16 +150,16 @@ export default function MonthPicker({
   };
 
   const isMonthStart = (year: number, monthIndex: number): boolean => {
-    if (!selectedRange.from) return false;
-    const fromMonth = getMonth(selectedRange.from);
-    const fromYear = getYear(selectedRange.from);
+    if (!monthRange.from) return false;
+    const fromMonth = getMonth(monthRange.from);
+    const fromYear = getYear(monthRange.from);
     return year === fromYear && monthIndex === fromMonth;
   };
 
   const isMonthEnd = (year: number, monthIndex: number): boolean => {
-    if (!selectedRange.to) return false;
-    const toMonth = getMonth(selectedRange.to);
-    const toYear = getYear(selectedRange.to);
+    if (!monthRange.to) return false;
+    const toMonth = getMonth(monthRange.to);
+    const toYear = getYear(monthRange.to);
     return year === toYear && monthIndex === toMonth;
   };
 
@@ -165,4 +240,3 @@ export default function MonthPicker({
     </div>
   );
 }
-
