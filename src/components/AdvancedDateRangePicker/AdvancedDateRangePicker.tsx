@@ -502,11 +502,23 @@ export default function AdvancedDateRangePicker({
   ) => {
     if (startDateUtc && endDateUtc && range?.to) {
       const nextStart = formatUtc(dayPickerProps);
-      setStartDateUtc(nextStart);
-      if (dayPickerProps.getTime() > parseUtc(endDateUtc).getTime()) {
-        setEndDateUtc("");
+      if (activeDateField === "start") {
+        if (parseUtc(endDateUtc).getTime() > parseUtc(nextStart).getTime()) {
+          setStartDateUtc(nextStart);
+        } else {
+          setStartDateUtc(nextStart);
+          setEndDateUtc("");
+        }
+      } else {
+        if (parseUtc(startDateUtc).getTime() > parseUtc(nextStart).getTime()) {
+          setEndDateUtc(startDateUtc);
+          setStartDateUtc(nextStart);
+        } else {
+          setEndDateUtc(nextStart);
+          setStartDateUtc(startDateUtc);
+        }
       }
-      setActiveDateField("end");
+      setActiveDateField(activeDateField === "start" ? "end" : "start");
       return;
     }
     if (!startDateUtc && endDateUtc && range?.from) {
