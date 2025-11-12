@@ -561,23 +561,129 @@ export default function AdvancedDateRangePicker({
 
   // When in week mode, snap the selection to whole weeks
   const handleWeekCalendarSelect = (
-    range: { from?: Date; to?: Date } | undefined
+    range: { from?: Date; to?: Date } | undefined,
+    dayPickerProps: Date
   ) => {
     if (!range) return;
+    debugger;
+
     if (range.from) {
-      const weekStartFrom = startOfWeek(range.from, {
+      let weekStartFrom = startOfWeek(range.from, {
         weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
       });
-      const weekEndFrom = addDays(weekStartFrom, 6);
-      if (range.to) {
+      let weekEndFrom = addDays(weekStartFrom, 6);
+      debugger;
+
+      if (startDateUtc && endDateUtc) {
+        if (activeDateField === "start") {
+          if (
+            parseUtc(formatUtc(dayPickerProps)).getTime() >
+              parseUtc(endDateUtc).getTime() &&
+            parseUtc(formatUtc(dayPickerProps)).getTime() >
+              parseUtc(startDateUtc).getTime()
+          ) {
+            weekStartFrom = startOfWeek(dayPickerProps, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            weekEndFrom = addDays(weekStartFrom, 6);
+
+            handleCalendarSelect({ from: weekStartFrom, to: weekEndFrom });
+
+            // setStartDateUtc(formatUtc(dayPickerProps));
+          } else if (
+            parseUtc(formatUtc(dayPickerProps)).getTime() <
+              parseUtc(endDateUtc).getTime() &&
+            parseUtc(formatUtc(dayPickerProps)).getTime() <
+              parseUtc(startDateUtc).getTime()
+          ) {
+            weekStartFrom = startOfWeek(dayPickerProps, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            weekEndFrom = addDays(weekStartFrom, 6);
+
+            const weekStartTo = startOfWeek(endDateUtc, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            const weekEndTo = addDays(weekStartTo, 6);
+            handleCalendarSelect({ from: weekStartFrom, to: weekEndTo });
+          } else if (
+            parseUtc(formatUtc(dayPickerProps)).getTime() >
+              parseUtc(startDateUtc).getTime() &&
+            parseUtc(formatUtc(dayPickerProps)).getTime() <
+              parseUtc(endDateUtc).getTime()
+          ) {
+            weekStartFrom = startOfWeek(dayPickerProps, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            weekEndFrom = addDays(weekStartFrom, 6);
+
+            const weekStartTo = startOfWeek(endDateUtc, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            const weekEndTo = addDays(weekStartTo, 6);
+            handleCalendarSelect({ from: weekStartFrom, to: weekEndTo });
+          } else {
+            weekStartFrom = startOfWeek(dayPickerProps, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            weekEndFrom = addDays(dayPickerProps, 6);
+            handleCalendarSelect({ from: weekStartFrom, to: weekEndFrom });
+          }
+        } else {
+          if (
+            parseUtc(formatUtc(dayPickerProps)).getTime() >
+            parseUtc(endDateUtc).getTime()
+          ) {
+            weekStartFrom = startOfWeek(range.from, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            weekEndFrom = addDays(weekStartFrom, 6);
+
+            const weekStartTo = startOfWeek(dayPickerProps, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            const weekEndTo = addDays(weekStartTo, 6);
+
+            handleCalendarSelect({ from: weekStartFrom, to: weekEndTo });
+          } else if (
+            parseUtc(formatUtc(dayPickerProps)).getTime() <
+              parseUtc(endDateUtc).getTime() &&
+            parseUtc(formatUtc(dayPickerProps)).getTime() <
+              parseUtc(startDateUtc).getTime()
+          ) {
+            weekStartFrom = startOfWeek(dayPickerProps, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            weekEndFrom = addDays(weekStartFrom, 6);
+
+            const weekStartTo = startOfWeek(startDateUtc, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            const weekEndTo = addDays(weekStartTo, 6);
+            handleCalendarSelect({ from: weekStartFrom, to: weekEndTo });
+          } else {
+            weekStartFrom = startOfWeek(startDateUtc, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            weekEndFrom = addDays(weekStartFrom, 6);
+
+            const weekStartTo = startOfWeek(dayPickerProps, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+            const weekEndTo = addDays(weekStartTo, 6);
+            handleCalendarSelect({ from: weekStartFrom, to: weekEndTo });
+          }
+        }
+      }
+      if (range.to && (!startDateUtc || !endDateUtc)) {
         const weekStartTo = startOfWeek(range.to, {
           weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
         });
         const weekEndTo = addDays(weekStartTo, 6);
+        debugger;
         handleCalendarSelect({ from: weekStartFrom, to: weekEndTo });
-      } else {
-        handleCalendarSelect({ from: weekStartFrom, to: weekEndFrom });
       }
+      setActiveDateField(activeDateField === "start" ? "end" : "start");
     }
   };
 
@@ -1852,13 +1958,20 @@ export default function AdvancedDateRangePicker({
                     `W${String(weekNumber).padStart(2, "0")}`,
                 }}
                 selected={selectedRange}
-                onSelect={handleWeekCalendarSelect}
+                onSelect={(range, dayPickerProps) => {
+                  handleWeekCalendarSelect(range, dayPickerProps);
+                }}
                 onWeekNumberClick={(_weekNumber: number, dates: Date[]) => {
+                  debugger;
                   if (dates && dates.length > 0) {
-                    handleWeekCalendarSelect({
-                      from: dates[0],
-                      to: dates[dates.length - 1],
-                    });
+                    handleWeekCalendarSelect(
+                      null,
+                      {
+                        from: dates[0],
+                        to: dates[dates.length - 1],
+                      },
+                      dates[0]
+                    );
                   }
                 }}
                 month={displayedMonth}
