@@ -24,6 +24,7 @@ interface PresetSidebarProps {
     warning: string;
     success: string;
   };
+  disabled?: boolean;
 }
 
 const SAVED_DATES_KEY = "savedDateRanges";
@@ -33,6 +34,7 @@ export default function PresetSidebar({
   onSavedDateSelect,
   currentSelection,
   themeColors,
+  disabled = false,
 }: PresetSidebarProps) {
   const [savedDates, setSavedDates] = useState<SavedDateRange[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -58,11 +60,13 @@ export default function PresetSidebar({
   const handlePresetClick = (
     getValue: () => { startDateUtc: string; endDateUtc: string }
   ) => {
+    if (disabled) return;
     const { startDateUtc, endDateUtc } = getValue();
     onPresetSelect(startDateUtc, endDateUtc);
   };
 
   const handleSaveDateRange = async () => {
+    if (disabled) return;
     if (newLabel.trim() === "") {
       alert("Please enter a label for the saved date range");
       return;
@@ -84,6 +88,7 @@ export default function PresetSidebar({
   };
 
   const handleDeleteSavedDate = async (id: string) => {
+    if (disabled) return;
     const updatedSavedDates = savedDates.filter((d) => d.id !== id);
     setSavedDates(updatedSavedDates);
     await storageService.saveData(SAVED_DATES_KEY, updatedSavedDates);
@@ -91,6 +96,7 @@ export default function PresetSidebar({
 
   const handleLoadSavedDate = (saved: SavedDateRange) => {
     // If there's a handler for full saved date selection, use it
+    if (disabled) return;
     if (onSavedDateSelect) {
       onSavedDateSelect(saved.selection);
     } else {
@@ -118,7 +124,9 @@ export default function PresetSidebar({
 
   return (
     <div
-      className="w-72 bg-white border-r border-gray-200 py-4 flex flex-col h-full overflow-hidden"
+      className={`w-72 bg-white border-r border-gray-200 py-4 flex flex-col h-full overflow-hidden ${
+        disabled ? "opacity-60" : ""
+      }`}
       style={{ ...themeColors }}
     >
       {/* Default Presets */}
@@ -135,12 +143,26 @@ export default function PresetSidebar({
               <button
                 key={preset.label}
                 onClick={() => handlePresetClick(preset.getValue)}
-                className="w-full text-left px-3 py-2 hover:bg-white hover:shadow-sm rounded-md transition-all"
+                disabled={disabled}
+                aria-disabled={disabled}
+                className={`w-full text-left px-3 py-2 rounded-md transition-all ${
+                  disabled
+                    ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                    : "hover:bg-white hover:shadow-sm"
+                }`}
               >
-                <div className="text-sm font-semibold text-gray-900">
+                <div
+                  className={`text-sm font-semibold ${
+                    disabled ? "text-gray-400" : "text-gray-900"
+                  }`}
+                >
                   {preset.label}
                 </div>
-                <div className="text-xs text-gray-600 leading-relaxed mt-0.5">
+                <div
+                  className={`text-xs leading-relaxed mt-0.5 ${
+                    disabled ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   {formatDateRange(startDateUtc, endDateUtc)}
                 </div>
               </button>
@@ -157,8 +179,14 @@ export default function PresetSidebar({
               Saved Dates
             </h3>
             <button
-              onClick={() => setShowHelp(!showHelp)}
-              className="text-gray-400 hover:text-gray-600"
+              onClick={() => {
+                if (disabled) return;
+                setShowHelp(!showHelp);
+              }}
+              disabled={disabled}
+              className={`text-gray-400 ${
+                disabled ? "cursor-not-allowed opacity-50" : "hover:text-gray-600"
+              }`}
             >
               <HelpCircle className="w-3 h-3" />
             </button>
@@ -185,12 +213,23 @@ export default function PresetSidebar({
                 <div className="flex items-start justify-between px-3 py-2">
                   <button
                     onClick={() => handleLoadSavedDate(saved)}
-                    className="flex-1 text-left"
+                    disabled={disabled}
+                    className={`flex-1 text-left ${
+                      disabled ? "cursor-not-allowed opacity-60" : ""
+                    }`}
                   >
-                    <div className="text-sm font-semibold text-gray-900 mb-1">
+                    <div
+                      className={`text-sm font-semibold mb-1 ${
+                        disabled ? "text-gray-400" : "text-gray-900"
+                      }`}
+                    >
                       {saved.label}
                     </div>
-                    <div className="text-xs text-gray-600 leading-relaxed">
+                    <div
+                      className={`text-xs leading-relaxed ${
+                        disabled ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
                       {formatDateRange(
                         saved.selection.startDateUtc,
                         saved.selection.endDateUtc
@@ -248,7 +287,12 @@ export default function PresetSidebar({
                   </button>
                   <button
                     onClick={() => handleDeleteSavedDate(saved.id)}
-                    className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-opacity ml-2"
+                    disabled={disabled}
+                    className={`${
+                      disabled
+                        ? "opacity-40 cursor-not-allowed"
+                        : "opacity-0 group-hover:opacity-100"
+                    } text-red-500 hover:text-red-700 transition-opacity ml-2`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -259,8 +303,14 @@ export default function PresetSidebar({
         )}
 
         <button
-          onClick={() => setShowSaveModal(true)}
-          className="w-full flex-shrink-0 px-3 py-2 text-[#003DB8] opacity-50 hover:opacity-100 text-sm font-medium rounded-mdtransition-colors flex items-center justify-center gap-2 mt-auto"
+          onClick={() => {
+            if (disabled) return;
+            setShowSaveModal(true);
+          }}
+          disabled={disabled}
+          className={`w-full flex-shrink-0 px-3 py-2 text-[#003DB8] opacity-50 hover:opacity-100 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2 mt-auto ${
+            disabled ? "cursor-not-allowed" : ""
+          }`}
         >
           <Plus className="w-4 h-4" />
           Save selected date

@@ -275,6 +275,7 @@ export default function AdvancedDateRangePicker({
   }, [startDateUtc, endDateUtc]);
 
   const handleStartDateChange = (value: string) => {
+    if (excludeEnabled) return;
     setStartDateUtc(value);
     if (value) {
       if (!endDateUtc) {
@@ -294,6 +295,7 @@ export default function AdvancedDateRangePicker({
   };
 
   const handleEndDateChange = (value: string) => {
+    if (excludeEnabled) return;
     setEndDateUtc(value);
     if (value) {
       if (!startDateUtc) {
@@ -335,6 +337,7 @@ export default function AdvancedDateRangePicker({
   };
 
   const handleDurationChange = (value: number) => {
+    if (excludeEnabled) return;
     if (value <= 0) return;
     setDuration(value);
 
@@ -367,6 +370,7 @@ export default function AdvancedDateRangePicker({
   };
 
   const handleUnitChange = (newUnit: DateRangeUnit) => {
+    if (excludeEnabled) return;
     setUnit(newUnit);
   };
 
@@ -379,6 +383,7 @@ export default function AdvancedDateRangePicker({
   };
 
   const handlePresetSelect = (startDate: string, endDate: string) => {
+    if (excludeEnabled) return;
     setStartDateUtc(startDate);
     setEndDateUtc(endDate);
     setActiveDateField("start");
@@ -389,6 +394,7 @@ export default function AdvancedDateRangePicker({
   };
 
   const handleSavedDateSelect = (selection: DateRangeSelection) => {
+    if (excludeEnabled) return;
     setStartDateUtc(selection.startDateUtc);
     setEndDateUtc(selection.endDateUtc);
     setUnit(selection.unit);
@@ -428,6 +434,7 @@ export default function AdvancedDateRangePicker({
   };
 
   const handleToday = () => {
+    if (excludeEnabled) return;
     setStartDateUtc(today);
     setEndDateUtc(today);
     setExcludedWeekdays([]);
@@ -437,6 +444,7 @@ export default function AdvancedDateRangePicker({
   };
 
   const handleClear = () => {
+    if (excludeEnabled) return;
     setStartDateUtc("");
     setEndDateUtc("");
     setDuration(1);
@@ -466,6 +474,7 @@ export default function AdvancedDateRangePicker({
   );
 
   const handleApply = () => {
+    if (excludeEnabled) return;
     // Prevent applying if dates are empty
     if (hasEmptyDates) {
       return;
@@ -493,6 +502,7 @@ export default function AdvancedDateRangePicker({
   const handleCalendarSelect = (
     range: { from?: Date; to?: Date } | undefined
   ) => {
+    if (excludeEnabled) return;
     if (range?.from) {
       const newStart = formatUtc(range.from);
       setStartDateUtc(newStart);
@@ -512,6 +522,7 @@ export default function AdvancedDateRangePicker({
     range: { from?: Date; to?: Date } | undefined,
     dayPickerProps: Date
   ) => {
+    if (excludeEnabled) return;
     if (startDateUtc && endDateUtc && range?.to) {
       const nextStart = formatUtc(dayPickerProps);
       if (activeDateField === "start") {
@@ -564,6 +575,7 @@ export default function AdvancedDateRangePicker({
     range: { from?: Date; to?: Date } | undefined,
     dayPickerProps: Date
   ) => {
+    if (excludeEnabled) return;
     if (!range) return;
 
     if (range.from) {
@@ -698,6 +710,9 @@ export default function AdvancedDateRangePicker({
     from: startDateUtc ? parseUtc(startDateUtc) : todayDateObj,
     to: endDateUtc ? parseUtc(endDateUtc) : todayDateObj,
   };
+
+  const dayPickerDisabledMatcher = (date: Date): boolean =>
+    excludeEnabled ? true : isDateDisabled(date);
 
   // Helper function for disabled date logic (used by all DayPicker instances)
   const isDateDisabled = (date: Date): boolean => {
@@ -1175,6 +1190,7 @@ export default function AdvancedDateRangePicker({
           excludedDateRanges
         )}
         themeColors={themeColors}
+        disabled={excludeEnabled}
       />
 
       {/* Main Content */}
@@ -1187,8 +1203,13 @@ export default function AdvancedDateRangePicker({
                 <button
                   key={u}
                   onClick={() => handleUnitChange(u)}
+                  disabled={excludeEnabled}
                   className={`px-4 py-2 rounded-lg text-sm font-light transition-colors ${
-                    unit === u
+                    excludeEnabled
+                      ? unit === u
+                        ? "bg-[#EBF0F9] text-[#003DB8] border border-[#003DB8] opacity-60 cursor-not-allowed"
+                        : "bg-[#EBF0F9] text-gray-400 opacity-60 cursor-not-allowed border border-transparent"
+                      : unit === u
                       ? "bg-[#EBF0F9] text-[#003DB8] border border-[#003DB8]"
                       : "bg-[#EBF0F9] text-gray-500 hover:bg-[#EBF0F9]"
                   }`}
@@ -1204,9 +1225,7 @@ export default function AdvancedDateRangePicker({
             <div>
               <label
                 className={`block text-xs font-medium mb-1 ${
-                  activeDateField === "start"
-                    ? "text-blue-600"
-                    : "text-gray-600"
+                  excludeEnabled ? "text-gray-400" : "text-gray-600"
                 }`}
               >
                 Start Date
@@ -1216,7 +1235,8 @@ export default function AdvancedDateRangePicker({
                 onChange={handleStartDateChange}
                 placeholder="DD/MM/YYYY"
                 onFocus={() => setActiveDateField("start")}
-                className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                disabled={excludeEnabled}
+                className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed disabled:focus:ring-0 ${
                   activeDateField === "start"
                     ? "border-blue-500"
                     : "border-gray-300"
@@ -1226,7 +1246,7 @@ export default function AdvancedDateRangePicker({
             <div>
               <label
                 className={`block text-xs font-medium mb-1 ${
-                  activeDateField === "end" ? "text-blue-600" : "text-gray-600"
+                  excludeEnabled ? "text-gray-400" : "text-gray-600"
                 }`}
               >
                 End Date
@@ -1236,7 +1256,8 @@ export default function AdvancedDateRangePicker({
                 onChange={handleEndDateChange}
                 placeholder="DD/MM/YYYY"
                 onFocus={() => setActiveDateField("end")}
-                className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                disabled={excludeEnabled}
+                className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed disabled:focus:ring-0 ${
                   activeDateField === "end"
                     ? "border-blue-500"
                     : "border-gray-300"
@@ -1254,10 +1275,13 @@ export default function AdvancedDateRangePicker({
                   min="1"
                   value={duration}
                   onChange={(e) => handleDurationChange(Number(e.target.value))}
-                  className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
+                  disabled={excludeEnabled}
+                  className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed disabled:focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
                 <span
-                  className="absolute top-1/2 -translate-y-1/2 text-sm text-gray-500 pointer-events-none"
+                  className={`absolute top-1/2 -translate-y-1/2 text-sm pointer-events-none ${
+                    excludeEnabled ? "text-gray-300" : "text-gray-500"
+                  }`}
                   style={{ left: `${unitPosition}px` }}
                 >
                   {getUnitAbbreviation(unit)}
@@ -1288,7 +1312,7 @@ export default function AdvancedDateRangePicker({
                 htmlFor="exclude-checkbox"
                 className="text-sm text-gray-700"
               >
-                exclude from selection
+                exclude
               </label>
 
               <div className="relative flex-1" ref={dropdownRef}>
@@ -1804,7 +1828,7 @@ export default function AdvancedDateRangePicker({
                             }
                           }}
                           numberOfMonths={1}
-                          disabled={isDateDisabled}
+                          disabled={dayPickerDisabledMatcher}
                           modifiersClassNames={{
                             selected: "rdp-day_selected bg-[#003DB8]",
                             disabled:
@@ -1828,7 +1852,7 @@ export default function AdvancedDateRangePicker({
                           month={displayedMonth}
                           onMonthChange={setDisplayedMonth}
                           numberOfMonths={1}
-                          disabled={isDateDisabled}
+                          disabled={dayPickerDisabledMatcher}
                           modifiersClassNames={{
                             selected: "rdp-day_selected bg-[#003DB8]",
                             disabled:
@@ -1860,7 +1884,7 @@ export default function AdvancedDateRangePicker({
                       month={displayedMonth}
                       onMonthChange={setDisplayedMonth}
                       numberOfMonths={2}
-                      disabled={isDateDisabled}
+                      disabled={dayPickerDisabledMatcher}
                       modifiersClassNames={{
                         selected: "rdp-day_selected",
                         disabled:
@@ -1909,7 +1933,7 @@ export default function AdvancedDateRangePicker({
                           }
                         }}
                         numberOfMonths={1}
-                        disabled={isDateDisabled}
+                        disabled={dayPickerDisabledMatcher}
                         modifiersClassNames={{
                           selected: "rdp-day_selected bg-[#003DB8]",
                           disabled:
@@ -1933,7 +1957,7 @@ export default function AdvancedDateRangePicker({
                         month={displayedMonth}
                         onMonthChange={setDisplayedMonth}
                         numberOfMonths={1}
-                        disabled={isDateDisabled}
+                        disabled={dayPickerDisabledMatcher}
                         modifiersClassNames={{
                           selected: "rdp-day_selected bg-[#003DB8]",
                           disabled:
@@ -1983,6 +2007,7 @@ export default function AdvancedDateRangePicker({
                 onMonthChange={setDisplayedMonth}
                 numberOfMonths={2}
                 disabled={(date) => {
+                  if (excludeEnabled) return true;
                   const isFutureDate =
                     !ALLOW_FUTURE_DATES && formatUtc(date) > today;
 
@@ -2093,12 +2118,14 @@ export default function AdvancedDateRangePicker({
                 onSelect={handleCalendarSelect}
                 activeDateField={activeDateField}
                 onActiveFieldChange={setActiveDateField}
+                disabled={excludeEnabled}
               />
             )}
             {unit === "quarter" && (
               <QuarterPicker
                 selectedRange={monthQuarterRange}
                 onSelect={handleCalendarSelect}
+                disabled={excludeEnabled}
               />
             )}
           </div>
@@ -2108,28 +2135,45 @@ export default function AdvancedDateRangePicker({
         <div className="flex items-center justify-between pt-4 pb-6 px-6 border-t border-gray-200">
           <button
             onClick={handleToday}
-            className="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            disabled={excludeEnabled}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              excludeEnabled
+                ? "text-blue-300 cursor-not-allowed bg-transparent"
+                : "text-blue-600 hover:bg-blue-50"
+            }`}
           >
             Today
           </button>
           <div className="flex gap-2">
             <button
               onClick={handleClear}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              disabled={excludeEnabled}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                excludeEnabled
+                  ? "text-gray-300 cursor-not-allowed bg-gray-100/40"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             >
               Clear dates
             </button>
             <button
               onClick={onCancel}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              disabled={excludeEnabled}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                excludeEnabled
+                  ? "text-gray-300 cursor-not-allowed bg-gray-100/40"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             >
               Cancel
             </button>
             <button
               onClick={handleApply}
-              disabled={Boolean(hasEmptyDates || hasFutureDates)}
+              disabled={Boolean(
+                excludeEnabled || hasEmptyDates || hasFutureDates
+              )}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                hasEmptyDates || hasFutureDates
+                excludeEnabled || hasEmptyDates || hasFutureDates
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-blue-600 text-white hover:bg-blue-700"
               }`}

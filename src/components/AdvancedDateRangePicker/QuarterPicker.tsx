@@ -13,6 +13,7 @@ import { ALLOW_FUTURE_DATES } from "../../config/dateConfig";
 interface QuarterPickerProps {
   selectedRange: { from: Date; to: Date };
   onSelect: (range: { from?: Date; to?: Date } | undefined) => void;
+  disabled?: boolean;
 }
 
 const QUARTERS = ["Q1", "Q2", "Q3", "Q4"];
@@ -20,6 +21,7 @@ const QUARTERS = ["Q1", "Q2", "Q3", "Q4"];
 export default function QuarterPicker({
   selectedRange,
   onSelect,
+  disabled = false,
 }: QuarterPickerProps) {
   // Get the starting year from selected range or current year
   const selectedStartYear = getYear(selectedRange.from);
@@ -28,6 +30,7 @@ export default function QuarterPicker({
 
   const handleQuarterClick = (year: number, quarterIndex: number) => {
     // quarterIndex is 0-3, but date-fns expects 1-4
+    if (disabled) return;
     const clickedDate = startOfQuarter(
       setQuarter(setYear(new Date(), year), quarterIndex + 1)
     );
@@ -112,13 +115,13 @@ export default function QuarterPicker({
               <button
                 key={quarter}
                 onClick={() =>
-                  !futureQuarter && handleQuarterClick(year, index)
+                  !futureQuarter && !disabled && handleQuarterClick(year, index)
                 }
-                disabled={futureQuarter}
+                disabled={futureQuarter || disabled}
                 className={`
                   px-4 py-6 text-base font-medium rounded-md transition-colors
                   ${
-                    futureQuarter
+                    futureQuarter || disabled
                       ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed"
                       : isSelected
                       ? "bg-blue-600 text-white"
@@ -142,8 +145,11 @@ export default function QuarterPicker({
       {/* Navigation */}
       <div className="flex items-center justify-between mb-4">
         <button
-          onClick={() => setDisplayYear(displayYear - 1)}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+          onClick={() => !disabled && setDisplayYear(displayYear - 1)}
+          disabled={disabled}
+          className={`p-2 rounded-md transition-colors ${
+            disabled ? "cursor-not-allowed opacity-40" : "hover:bg-gray-100"
+          }`}
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -151,8 +157,11 @@ export default function QuarterPicker({
           {displayYear} - {displayYear + 1}
         </div>
         <button
-          onClick={() => setDisplayYear(displayYear + 1)}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+          onClick={() => !disabled && setDisplayYear(displayYear + 1)}
+          disabled={disabled}
+          className={`p-2 rounded-md transition-colors ${
+            disabled ? "cursor-not-allowed opacity-40" : "hover:bg-gray-100"
+          }`}
         >
           <ChevronRight className="w-5 h-5" />
         </button>

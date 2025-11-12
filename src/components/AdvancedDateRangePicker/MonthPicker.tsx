@@ -16,6 +16,7 @@ interface MonthPickerProps {
   onSelect: (range: { from?: Date; to?: Date } | undefined) => void;
   activeDateField?: "start" | "end";
   onActiveFieldChange?: (field: "start" | "end") => void;
+  disabled?: boolean;
 }
 
 type MonthRange = { from?: Date; to?: Date };
@@ -55,6 +56,7 @@ export default function MonthPicker({
   onSelect,
   activeDateField = "start",
   onActiveFieldChange,
+  disabled = false,
 }: MonthPickerProps) {
   const today = parseUtc(getTodayUtc());
   const initialRange = normalizeRange(selectedRange);
@@ -100,6 +102,7 @@ export default function MonthPicker({
   }, [selectedRange]);
 
   const handleMonthClick = (year: number, monthIndex: number) => {
+    if (disabled) return;
     const clickedDate = setMonth(setYear(new Date(), year), monthIndex);
     const monthStart = startOfMonth(clickedDate);
     const monthEnd = endOfMonth(clickedDate);
@@ -193,12 +196,14 @@ export default function MonthPicker({
             return (
               <button
                 key={month}
-                onClick={() => !futureMonth && handleMonthClick(year, index)}
-                disabled={futureMonth}
+                onClick={() =>
+                  !futureMonth && !disabled && handleMonthClick(year, index)
+                }
+                disabled={futureMonth || disabled}
                 className={`
                   px-3 py-2 text-sm font-medium rounded-md transition-colors
                   ${
-                    futureMonth
+                    futureMonth || disabled
                       ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed"
                       : isSelected
                       ? "bg-[#003DB8] text-white"
@@ -222,8 +227,11 @@ export default function MonthPicker({
       {/* Navigation */}
       <div className="flex items-center justify-between mb-4">
         <button
-          onClick={() => setDisplayYear(displayYear - 1)}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+          onClick={() => !disabled && setDisplayYear(displayYear - 1)}
+          disabled={disabled}
+          className={`p-2 rounded-md transition-colors ${
+            disabled ? "cursor-not-allowed opacity-40" : "hover:bg-gray-100"
+          }`}
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -231,8 +239,11 @@ export default function MonthPicker({
           {displayYear} - {displayYear + 1}
         </div>
         <button
-          onClick={() => setDisplayYear(displayYear + 1)}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+          onClick={() => !disabled && setDisplayYear(displayYear + 1)}
+          disabled={disabled}
+          className={`p-2 rounded-md transition-colors ${
+            disabled ? "cursor-not-allowed opacity-40" : "hover:bg-gray-100"
+          }`}
         >
           <ChevronRight className="w-5 h-5" />
         </button>
