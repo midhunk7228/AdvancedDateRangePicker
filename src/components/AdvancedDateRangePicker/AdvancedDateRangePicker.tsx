@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import type { CSSProperties } from "react";
 import { DayPicker } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
@@ -81,6 +81,12 @@ const WEEKDAY_LABELS = [
   { value: 6, label: "Sa" },
 ];
 
+type SupportedExcludeFilterType = "days" | "saved-dates";
+type LegacyExcludeFilterType = "specific-date" | "date-range";
+type AnyExcludeFilterType =
+  | SupportedExcludeFilterType
+  | LegacyExcludeFilterType;
+
 const MONTHS = [
   "Jan",
   "Feb",
@@ -122,6 +128,13 @@ export default function AdvancedDateRangePicker({
     ...themeColors,
   };
 
+  const initialSupportedExcludeFilterTypes: SupportedExcludeFilterType[] = (
+    initialSelection?.excludeFilterTypes || []
+  ).filter(
+    (type): type is SupportedExcludeFilterType =>
+      type === "days" || type === "saved-dates"
+  );
+
   // Initialize state
   const [unit, setUnit] = useState<DateRangeUnit>(
     initialSelection?.unit || "day"
@@ -148,7 +161,7 @@ export default function AdvancedDateRangePicker({
     initialSelection?.excludedWeekdays || []
   );
   const [excludedSpecificDates, setExcludedSpecificDates] = useState<string[]>(
-    []
+    initialSelection?.excludedSpecificDates || []
   );
 
   // Ref for measuring text width
@@ -158,21 +171,41 @@ export default function AdvancedDateRangePicker({
   // Exclude filter state
   const [excludeEnabled, setExcludeEnabled] = useState(false);
   const [excludeFilterTypes, setExcludeFilterTypes] = useState<
-    ("days" | "specific-date" | "saved-dates" | "date-range")[]
-  >([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [activeFilterView, setActiveFilterView] = useState<
-    "days" | "specific-date" | "saved-dates" | "date-range" | null
-  >(null);
-  const [excludedSavedDates, setExcludedSavedDates] = useState<string[]>([]);
+    SupportedExcludeFilterType[]
+  >(initialSupportedExcludeFilterTypes);
+  const [activeFilterView, setActiveFilterView] =
+    useState<SupportedExcludeFilterType | null>(null);
+  const [excludedSavedDates, setExcludedSavedDates] = useState<string[]>(
+    initialSelection?.excludedSavedDates || []
+  );
   const [excludedDateRanges, setExcludedDateRanges] = useState<
     Array<{ id: string; start: string; end: string }>
-  >([]);
-  const [tempDateRange, setTempDateRange] = useState<DateRange | undefined>(
-    undefined
-  );
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
+  >(initialSelection?.excludedDateRanges || []);
+  const excludeSavedStateRef = useRef<{
+    excludeFilterTypes: AnyExcludeFilterType[];
+    excludedWeekdays: number[];
+    excludedSpecificDates: string[];
+    excludedSavedDates: string[];
+    excludedDateRanges: Array<{ id: string; start: string; end: string }>;
+  }>({
+    excludeFilterTypes: initialSupportedExcludeFilterTypes,
+    excludedWeekdays: initialSelection?.excludedWeekdays || [],
+    excludedSpecificDates: initialSelection?.excludedSpecificDates || [],
+    excludedSavedDates: initialSelection?.excludedSavedDates || [],
+    excludedDateRanges: initialSelection?.excludedDateRanges || [],
+  });
+  const [excludeApplied, setExcludeApplied] = useState<boolean>(() => {
+    if (initialSelection?.excludeEnabled) {
+      return true;
+    }
+    return Boolean(
+      initialSupportedExcludeFilterTypes.length > 0 ||
+        (initialSelection?.excludedWeekdays &&
+          initialSelection.excludedWeekdays.length > 0) ||
+        (initialSelection?.excludedSavedDates &&
+          initialSelection.excludedSavedDates.length > 0)
+    );
+  });
   // Load saved dates for filter
   const [savedDatesForFilter, setSavedDatesForFilter] = useState<
     SavedDateRange[]
@@ -236,21 +269,6 @@ export default function AdvancedDateRangePicker({
       }
     }
   }, [duration]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   // Load saved dates for filter
   useEffect(() => {
@@ -336,6 +354,126 @@ export default function AdvancedDateRangePicker({
     return null;
   };
 
+  const sanitizeExcludeFilterTypes = (
+    types: AnyExcludeFilterType[]
+  ): SupportedExcludeFilterType[] =>
+    types.filter(
+      (type): type is SupportedExcludeFilterType =>
+        type === "days" || type === "saved-dates"
+    );
+
+  const handleExcludeToggle = (checked: boolean) => {
+    if (checked) {
+      setExcludeEnabled(true);
+      const savedState = excludeSavedStateRef.current;
+      const sanitizedTypes = sanitizeExcludeFilterTypes(
+        savedState.excludeFilterTypes
+      );
+      setExcludeFilterTypes([...sanitizedTypes]);
+      setExcludedWeekdays([...savedState.excludedWeekdays]);
+      setExcludedSpecificDates([...savedState.excludedSpecificDates]);
+      setExcludedSavedDates([...savedState.excludedSavedDates]);
+      setExcludedDateRanges([...savedState.excludedDateRanges]);
+
+      const nextActive = sanitizedTypes.find(
+        (type) => type === "days" || type === "saved-dates"
+      );
+      setActiveFilterView(
+        (nextActive as SupportedExcludeFilterType | null) ?? null
+      );
+    } else {
+      handleExcludeCancel();
+    }
+  };
+
+  const handleExcludeFilterButtonClick = (type: SupportedExcludeFilterType) => {
+    if (!excludeEnabled) return;
+
+    if (!excludeFilterTypes.includes(type)) {
+      setExcludeFilterTypes([...excludeFilterTypes, type]);
+    }
+
+    setActiveFilterView((prev) => (prev === type ? null : type));
+  };
+
+  const handleExcludeRemoveType = (type: SupportedExcludeFilterType) => {
+    if (!excludeEnabled) return;
+
+    const nextTypes = excludeFilterTypes.filter((t) => t !== type);
+    setExcludeFilterTypes(nextTypes);
+
+    if (type === "days") {
+      setExcludedWeekdays([]);
+    }
+    if (type === "saved-dates") {
+      setExcludedSavedDates([]);
+    }
+
+    if (activeFilterView === type) {
+      const fallback = nextTypes.find(
+        (t) => t === "days" || t === "saved-dates"
+      );
+      setActiveFilterView(
+        (fallback as SupportedExcludeFilterType | null) ?? null
+      );
+    }
+  };
+
+  const handleExcludeCancel = () => {
+    const savedState = excludeSavedStateRef.current;
+    const sanitizedTypes = sanitizeExcludeFilterTypes(
+      savedState.excludeFilterTypes
+    );
+    setExcludeFilterTypes([...sanitizedTypes]);
+    setExcludedWeekdays([...savedState.excludedWeekdays]);
+    setExcludedSpecificDates([...savedState.excludedSpecificDates]);
+    setExcludedSavedDates([...savedState.excludedSavedDates]);
+    setExcludedDateRanges([...savedState.excludedDateRanges]);
+    setExcludeApplied(
+      sanitizedTypes.length > 0 ||
+        savedState.excludedWeekdays.length > 0 ||
+        savedState.excludedSavedDates.length > 0
+    );
+    setExcludeEnabled(false);
+    setActiveFilterView(null);
+  };
+
+  const handleExcludeSave = () => {
+    const includeWeekDays = excludedWeekdays.length > 0;
+    const includeSavedDates = excludedSavedDates.length > 0;
+
+    const nextTypes: SupportedExcludeFilterType[] = [];
+    if (includeWeekDays) {
+      nextTypes.push("days");
+    }
+    if (includeSavedDates) {
+      nextTypes.push("saved-dates");
+    }
+
+    const nextWeekdays = includeWeekDays ? [...excludedWeekdays] : [];
+    const nextSpecificDates: string[] = [];
+    const nextSavedDates = includeSavedDates ? [...excludedSavedDates] : [];
+    const nextDateRanges: Array<{ id: string; start: string; end: string }> =
+      [];
+
+    excludeSavedStateRef.current = {
+      excludeFilterTypes: nextTypes,
+      excludedWeekdays: nextWeekdays,
+      excludedSpecificDates: nextSpecificDates,
+      excludedSavedDates: nextSavedDates,
+      excludedDateRanges: nextDateRanges,
+    };
+
+    setExcludeFilterTypes(nextTypes);
+    setExcludedWeekdays(nextWeekdays);
+    setExcludedSpecificDates(nextSpecificDates);
+    setExcludedSavedDates(nextSavedDates);
+    setExcludedDateRanges(nextDateRanges);
+    setExcludeApplied(nextTypes.length > 0);
+    setExcludeEnabled(false);
+    setActiveFilterView(null);
+  };
+
   const handleDurationChange = (value: number) => {
     if (excludeEnabled) return;
     if (value <= 0) return;
@@ -375,10 +513,20 @@ export default function AdvancedDateRangePicker({
   };
 
   const toggleWeekday = (day: number) => {
-    if (excludedWeekdays.includes(day)) {
-      setExcludedWeekdays(excludedWeekdays.filter((d) => d !== day));
-    } else {
-      setExcludedWeekdays([...excludedWeekdays, day]);
+    setExcludedWeekdays((current) => {
+      if (current.includes(day)) {
+        return current.filter((d) => d !== day);
+      }
+      return [...current, day];
+    });
+
+    if (excludeEnabled) {
+      setExcludeFilterTypes((current) => {
+        if (current.includes("days")) {
+          return current;
+        }
+        return [...current, "days"];
+      });
     }
   };
 
@@ -398,34 +546,39 @@ export default function AdvancedDateRangePicker({
     setStartDateUtc(selection.startDateUtc);
     setEndDateUtc(selection.endDateUtc);
     setUnit(selection.unit);
-    setExcludedWeekdays(selection.excludedWeekdays);
+    const restoredWeekdays = selection.excludedWeekdays || [];
+    setExcludedWeekdays(restoredWeekdays);
     setDuration(selection.duration);
     setActiveDateField("start");
 
-    // Restore exclude filter state
-    if (selection.excludeEnabled !== undefined) {
-      setExcludeEnabled(selection.excludeEnabled);
-    }
-    if (selection.excludeFilterTypes) {
-      setExcludeFilterTypes(selection.excludeFilterTypes);
-    } else {
-      setExcludeFilterTypes([]);
-    }
-    if (selection.excludedSpecificDates) {
-      setExcludedSpecificDates(selection.excludedSpecificDates);
-    } else {
-      setExcludedSpecificDates([]);
-    }
-    if (selection.excludedSavedDates) {
-      setExcludedSavedDates(selection.excludedSavedDates);
-    } else {
-      setExcludedSavedDates([]);
-    }
-    if (selection.excludedDateRanges) {
-      setExcludedDateRanges(selection.excludedDateRanges);
-    } else {
-      setExcludedDateRanges([]);
-    }
+    const restoredTypes = (selection.excludeFilterTypes || []).filter(
+      (type): type is "days" | "saved-dates" =>
+        type === "days" || type === "saved-dates"
+    );
+
+    const restoredSpecificDates = selection.excludedSpecificDates || [];
+    const restoredSavedDates = selection.excludedSavedDates || [];
+    const restoredDateRanges = selection.excludedDateRanges || [];
+
+    setExcludeFilterTypes(restoredTypes);
+    setExcludedSpecificDates(restoredSpecificDates);
+    setExcludedSavedDates(restoredSavedDates);
+    setExcludedDateRanges(restoredDateRanges);
+
+    excludeSavedStateRef.current = {
+      excludeFilterTypes: restoredTypes,
+      excludedWeekdays: restoredWeekdays,
+      excludedSpecificDates: restoredSpecificDates,
+      excludedSavedDates: restoredSavedDates,
+      excludedDateRanges: restoredDateRanges,
+    };
+    setExcludeApplied(
+      restoredTypes.length > 0 ||
+        restoredWeekdays.length > 0 ||
+        restoredSavedDates.length > 0
+    );
+    setExcludeEnabled(false);
+    setActiveFilterView(null);
 
     // Navigate calendar to show the month of the start date
     if (selection.startDateUtc) {
@@ -458,8 +611,15 @@ export default function AdvancedDateRangePicker({
     setExcludedSpecificDates([]);
     setExcludedSavedDates([]);
     setExcludedDateRanges([]);
-    setTempDateRange(undefined);
     setActiveFilterView(null);
+    excludeSavedStateRef.current = {
+      excludeFilterTypes: [],
+      excludedWeekdays: [],
+      excludedSpecificDates: [],
+      excludedSavedDates: [],
+      excludedDateRanges: [],
+    };
+    setExcludeApplied(false);
 
     // Navigate calendar to current month
     setDisplayedMonth(startOfMonth(parseUtc(today)));
@@ -490,7 +650,7 @@ export default function AdvancedDateRangePicker({
       endDateUtc,
       unit,
       excludedWeekdays,
-      excludeEnabled,
+      excludeApplied,
       excludeFilterTypes,
       excludedSpecificDates,
       excludedSavedDates,
@@ -723,10 +883,6 @@ export default function AdvancedDateRangePicker({
       excludeEnabled &&
       excludeFilterTypes.includes("days") &&
       excludedWeekdays.includes(date.getDay());
-    const isSpecificDateExcluded =
-      excludeEnabled &&
-      excludeFilterTypes.includes("specific-date") &&
-      excludedSpecificDates.includes(formatUtc(date));
 
     // Check if date falls within any excluded saved date range
     const isInExcludedSavedDate =
@@ -786,21 +942,7 @@ export default function AdvancedDateRangePicker({
         return false;
       });
 
-    const isInExcludedDateRange =
-      excludeEnabled &&
-      excludeFilterTypes.includes("date-range") &&
-      excludedDateRanges.some((range) => {
-        const dateStr = formatUtc(date);
-        return dateStr >= range.start && dateStr <= range.end;
-      });
-
-    return (
-      isFutureDate ||
-      isWeekdayExcluded ||
-      isSpecificDateExcluded ||
-      isInExcludedSavedDate ||
-      isInExcludedDateRange
-    );
+    return isFutureDate || isWeekdayExcluded || isInExcludedSavedDate;
   };
 
   // Handle month selection from months grid
@@ -1183,7 +1325,7 @@ export default function AdvancedDateRangePicker({
           endDateUtc,
           unit,
           excludedWeekdays,
-          excludeEnabled,
+          excludeApplied,
           excludeFilterTypes,
           excludedSpecificDates,
           excludedSavedDates,
@@ -1300,331 +1442,144 @@ export default function AdvancedDateRangePicker({
 
           {/* Exclude Filter */}
           <div className="mb-4">
-            <div className="flex items-center gap-3 mb-3">
-              <input
-                type="checkbox"
-                id="exclude-checkbox"
-                checked={excludeEnabled}
-                onChange={(e) => setExcludeEnabled(e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label
-                htmlFor="exclude-checkbox"
-                className="text-sm text-gray-700"
-              >
-                exclude
-              </label>
-
-              <div className="relative flex-1" ref={dropdownRef}>
-                <button
-                  type="button"
-                  onClick={() =>
-                    excludeEnabled && setIsDropdownOpen(!isDropdownOpen)
-                  }
-                  disabled={!excludeEnabled}
-                  className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md text-sm text-left bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50"
+            <div className="flex flex-wrap items-center gap-3 mb-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="exclude-checkbox"
+                  checked={excludeEnabled}
+                  onChange={(e) => handleExcludeToggle(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="exclude-checkbox"
+                  className="text-sm text-gray-700"
                 >
-                  <span
-                    className={
-                      excludeFilterTypes.length === 0
-                        ? "text-gray-400"
-                        : "text-gray-700"
-                    }
-                  >
-                    {excludeFilterTypes.length === 0
-                      ? "select a filter"
-                      : excludeFilterTypes.length === 1
-                      ? (() => {
-                          const filterType = excludeFilterTypes[0];
-                          switch (filterType) {
-                            case "days":
-                              return "Days";
-                            case "specific-date":
-                              return "Specific Date";
-                            case "saved-dates":
-                              return "Saved Dates";
-                            case "date-range":
-                              return "Date Range";
-                            default:
-                              return "Specific Date";
-                          }
-                        })()
-                      : `${excludeFilterTypes.length} filters selected`}
-                  </span>
-                </button>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  {!excludeEnabled ? "exclude dates from selection" : "exclude"}
+                </label>
+              </div>
 
-                {isDropdownOpen && excludeEnabled && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                    <div className="p-2 space-y-1">
-                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={excludeFilterTypes.includes("days")}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setExcludeFilterTypes([
-                                ...excludeFilterTypes,
-                                "days",
-                              ]);
-                            } else {
-                              setExcludeFilterTypes(
-                                excludeFilterTypes.filter((t) => t !== "days")
-                              );
-                            }
-                          }}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-700">Days</span>
-                      </label>
-                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={excludeFilterTypes.includes("specific-date")}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setExcludeFilterTypes([
-                                ...excludeFilterTypes,
-                                "specific-date",
-                              ]);
-                            } else {
-                              setExcludeFilterTypes(
-                                excludeFilterTypes.filter(
-                                  (t) => t !== "specific-date"
-                                )
-                              );
-                            }
-                          }}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-700">
-                          Specific Date
-                        </span>
-                      </label>
-                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={excludeFilterTypes.includes("saved-dates")}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setExcludeFilterTypes([
-                                ...excludeFilterTypes,
-                                "saved-dates",
-                              ]);
-                            } else {
-                              setExcludeFilterTypes(
-                                excludeFilterTypes.filter(
-                                  (t) => t !== "saved-dates"
-                                )
-                              );
-                            }
-                          }}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-700">
-                          Saved Dates
-                        </span>
-                      </label>
-                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={excludeFilterTypes.includes("date-range")}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setExcludeFilterTypes([
-                                ...excludeFilterTypes,
-                                "date-range",
-                              ]);
-                            } else {
-                              setExcludeFilterTypes(
-                                excludeFilterTypes.filter(
-                                  (t) => t !== "date-range"
-                                )
-                              );
-                            }
-                          }}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-700">
-                          Date Range
-                        </span>
-                      </label>
+              {excludeEnabled && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => handleExcludeFilterButtonClick("days")}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md border text-sm font-medium transition-colors ${
+                          activeFilterView === "days"
+                            ? "border-blue-500 bg-[#F7F8FA] text-gray-700"
+                            : "border-gray-200 bg-[#F7F8FA] text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        <span>Week Days</span>
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                      </button>
+
+                      {activeFilterView === "days" &&
+                        excludeFilterTypes.includes("days") && (
+                          <div className="absolute right-0 mt-2 z-20">
+                            <div className="flex flex-col gap-3 px-2 py-2 bg-white border border-gray-200 rounded-xl shadow-xl">
+                              <div className="flex justify-center">
+                                <div className="inline-flex flex-col items-center gap-2 ">
+                                  {WEEKDAY_LABELS.map((day) => {
+                                    const isSelected =
+                                      excludedWeekdays.includes(day.value);
+                                    return (
+                                      <button
+                                        key={day.value}
+                                        onClick={() => toggleWeekday(day.value)}
+                                        className={`w-9 h-9 flex items-center justify-center rounded-md text-sm font-semibold transition-colors ${
+                                          isSelected
+                                            ? "bg-[#CEDBF5] shadow-inner"
+                                            : "text-gray-800 hover:bg-gray-100"
+                                        }`}
+                                      >
+                                        {day.label.charAt(0)}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
 
-            {/* Filter Icons */}
-            {excludeEnabled && excludeFilterTypes.length > 0 && (
-              <div className="flex gap-2 items-center">
-                {excludeFilterTypes.includes("days") && (
-                  <button
-                    onClick={() =>
-                      setActiveFilterView(
-                        activeFilterView === "days" ? null : "days"
-                      )
-                    }
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                      activeFilterView === "days"
-                        ? "bg-blue-100 text-blue-700 border border-blue-300"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <CalendarDays className="w-4 h-4" />
-                    <span>Days ({excludedWeekdays.length} selected)</span>
-                  </button>
-                )}
-
-                {excludeFilterTypes.includes("specific-date") && (
-                  <button
-                    onClick={() =>
-                      setActiveFilterView(
-                        activeFilterView === "specific-date"
-                          ? null
-                          : "specific-date"
-                      )
-                    }
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                      activeFilterView === "specific-date"
-                        ? "bg-blue-100 text-blue-700 border border-blue-300"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <CalendarDays className="w-4 h-4" />
-                    <span>Dates ({excludedSpecificDates.length} selected)</span>
-                  </button>
-                )}
-
-                {excludeFilterTypes.includes("saved-dates") && (
-                  <button
-                    onClick={() =>
-                      setActiveFilterView(
-                        activeFilterView === "saved-dates"
-                          ? null
-                          : "saved-dates"
-                      )
-                    }
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                      activeFilterView === "saved-dates"
-                        ? "bg-blue-100 text-blue-700 border border-blue-300"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <Bookmark className="w-4 h-4" />
-                    <span>Saved ({excludedSavedDates.length} selected)</span>
-                  </button>
-                )}
-
-                {excludeFilterTypes.includes("date-range") && (
-                  <button
-                    onClick={() =>
-                      setActiveFilterView(
-                        activeFilterView === "date-range" ? null : "date-range"
-                      )
-                    }
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                      activeFilterView === "date-range"
-                        ? "bg-blue-100 text-blue-700 border border-blue-300"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <CalendarDays className="w-4 h-4" />
-                    <span>
-                      Date Ranges ({excludedDateRanges.length} selected)
-                    </span>
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Days Filter Content - Shown when icon clicked */}
-            {excludeEnabled &&
-              activeFilterView === "days" &&
-              excludeFilterTypes.includes("days") && (
-                <div className="mt-3 flex gap-2">
-                  {WEEKDAY_LABELS.map((day) => (
                     <button
-                      key={day.value}
-                      onClick={() => toggleWeekday(day.value)}
-                      className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        excludedWeekdays.includes(day.value)
-                          ? "bg-red-100 text-red-700 border-2 border-red-400"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      type="button"
+                      onClick={() =>
+                        handleExcludeFilterButtonClick("saved-dates")
+                      }
+                      className={`flex items-center gap-2 px-3 py-2 rounded-md border text-sm font-medium transition-colors ${
+                        activeFilterView === "saved-dates"
+                          ? "border-blue-500 bg-[#F7F8FA] text-gray-700"
+                          : "border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100"
                       }`}
                     >
-                      {day.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+                      <span>Saved Dates</span>
 
-            {/* Specific Date Filter Content - Shown when icon clicked */}
-            {excludeEnabled &&
-              activeFilterView === "specific-date" &&
-              excludeFilterTypes.includes("specific-date") && (
-                <div className="mt-3 flex flex-col gap-3">
-                  <p className="text-xs text-gray-500 text-center mb-2">
-                    Click individual dates to exclude them
-                  </p>
-                  <div className="flex justify-center p-4 border border-gray-200 rounded-md bg-gray-50">
-                    <DayPicker
-                      mode="multiple"
-                      selected={excludedSpecificDates.map((d) => parseUtc(d))}
-                      onSelect={(dates) => {
-                        if (dates) {
-                          setExcludedSpecificDates(
-                            dates.map((d) => formatUtc(d))
-                          );
-                        }
-                      }}
-                      numberOfMonths={2}
-                      modifiersClassNames={{
-                        selected:
-                          "bg-red-500 text-white hover:bg-red-600 rounded-md",
-                      }}
-                    />
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </button>
                   </div>
 
-                  {excludedSpecificDates.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {excludedSpecificDates.map((date) => (
-                        <div
-                          key={date}
-                          className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs"
-                        >
-                          <span>
-                            {new Date(date + "T00:00:00").toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              }
-                            )}
-                          </span>
-                          <button
-                            onClick={() => {
-                              setExcludedSpecificDates(
-                                excludedSpecificDates.filter((d) => d !== date)
-                              );
-                            }}
-                            className="hover:bg-red-200 rounded-full p-0.5"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="flex items-center gap-2 ml-auto">
+                    <button
+                      type="button"
+                      onClick={handleExcludeCancel}
+                      className="px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExcludeSave}
+                      className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md shadow-sm hover:bg-blue-700 transition-colors"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {!excludeEnabled && excludeApplied && (
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  {excludeSavedStateRef.current.excludedWeekdays.length > 0 && (
+                    <span>
+                      Week Days (
+                      {excludeSavedStateRef.current.excludedWeekdays.length})
+                    </span>
+                  )}
+                  {excludeSavedStateRef.current.excludedSavedDates.length >
+                    0 && (
+                    <span>
+                      Saved Dates (
+                      {excludeSavedStateRef.current.excludedSavedDates.length})
+                    </span>
                   )}
                 </div>
               )}
+            </div>
 
+            {/* Specific Date filter UI temporarily disabled for redesign */}
             {/* Saved Dates Filter Content - Shown when icon clicked */}
             {excludeEnabled &&
               activeFilterView === "saved-dates" &&
               excludeFilterTypes.includes("saved-dates") && (
                 <div className="mt-3 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium text-gray-700">
+                      Saved Dates
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => handleExcludeRemoveType("saved-dates")}
+                      className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      Clear
+                    </button>
+                  </div>
+
                   {savedDatesForFilter.length === 0 ? (
                     <p className="text-sm text-gray-500 text-center py-4">
                       No saved dates available
@@ -1640,22 +1595,34 @@ export default function AdvancedDateRangePicker({
                             key={saved.id}
                             className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors ${
                               isExcluded
-                                ? "bg-red-50 border border-red-300"
+                                ? "bg-blue-50 border border-blue-300"
                                 : "bg-white hover:bg-gray-50 border border-gray-200"
                             }`}
                             onClick={() => {
-                              if (isExcluded) {
-                                setExcludedSavedDates(
-                                  excludedSavedDates.filter(
+                              setExcludedSavedDates((current) => {
+                                if (current.includes(saved.id)) {
+                                  const next = current.filter(
                                     (id) => id !== saved.id
-                                  )
-                                );
-                              } else {
-                                setExcludedSavedDates([
-                                  ...excludedSavedDates,
-                                  saved.id,
-                                ]);
-                              }
+                                  );
+
+                                  if (next.length === 0) {
+                                    setExcludeFilterTypes((types) =>
+                                      types.filter((t) => t !== "saved-dates")
+                                    );
+                                  }
+
+                                  return next;
+                                }
+
+                                setExcludeFilterTypes((types) => {
+                                  if (types.includes("saved-dates")) {
+                                    return types;
+                                  }
+                                  return [...types, "saved-dates"];
+                                });
+
+                                return [...current, saved.id];
+                              });
                             }}
                           >
                             <div className="flex-1">
@@ -1684,7 +1651,7 @@ export default function AdvancedDateRangePicker({
                               type="checkbox"
                               checked={isExcluded}
                               onChange={() => {}}
-                              className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                             />
                           </div>
                         );
@@ -1694,110 +1661,17 @@ export default function AdvancedDateRangePicker({
                 </div>
               )}
 
-            {/* Date Range Filter Content - Shown when icon clicked */}
-            {excludeEnabled &&
-              activeFilterView === "date-range" &&
-              excludeFilterTypes.includes("date-range") && (
-                <div className="mt-3 flex flex-col gap-3">
-                  <div className="border border-gray-200 rounded-md bg-gray-50 p-4">
-                    <DayPicker
-                      mode="range"
-                      selected={tempDateRange}
-                      onSelect={(range) => setTempDateRange(range)}
-                      numberOfMonths={2}
-                      disabled={(date) => {
-                        const isFutureDate =
-                          !ALLOW_FUTURE_DATES && formatUtc(date) > today;
-                        return isFutureDate;
-                      }}
-                      modifiersClassNames={{
-                        selected:
-                          "bg-red-500 text-white hover:bg-red-600 rounded-md",
-                      }}
-                    />
-                  </div>
-
-                  {tempDateRange?.from && tempDateRange?.to && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          const newRange = {
-                            id: `range-${Date.now()}`,
-                            start: formatUtc(tempDateRange.from!),
-                            end: formatUtc(tempDateRange.to!),
-                          };
-                          setExcludedDateRanges([
-                            ...excludedDateRanges,
-                            newRange,
-                          ]);
-                          setTempDateRange(undefined);
-                        }}
-                        className="px-3 py-1.5 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
-                      >
-                        Add Date Range
-                      </button>
-                      <button
-                        onClick={() => setTempDateRange(undefined)}
-                        className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors"
-                      >
-                        Clear Selection
-                      </button>
-                    </div>
-                  )}
-
-                  {excludedDateRanges.length > 0 && (
-                    <div className="flex flex-col gap-2">
-                      <p className="text-xs text-gray-600 font-medium">
-                        Excluded Date Ranges:
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {excludedDateRanges.map((range) => (
-                          <div
-                            key={range.id}
-                            className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs"
-                          >
-                            <span>
-                              {new Date(
-                                range.start + "T00:00:00"
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })}
-                              {" - "}
-                              {new Date(
-                                range.end + "T00:00:00"
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setExcludedDateRanges(
-                                  excludedDateRanges.filter(
-                                    (r) => r.id !== range.id
-                                  )
-                                );
-                              }}
-                              className="hover:bg-red-200 rounded-full p-0.5"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+            {/* Date Range filter UI temporarily disabled for redesign */}
           </div>
 
           {/* Calendar Views - Conditional based on unit */}
           <div className="flex gap-4 justify-center mb-4">
             {unit === "day" && (
-              <div className="flex gap-4">
+              <div
+                className={`flex gap-4 ${
+                  excludeEnabled ? "excluded-enabled" : "excluded-disabled"
+                }`}
+              >
                 {/* Check years view first, then months view, then default calendar */}
                 {yearsViewIndex !== null ? (
                   yearsViewIndex === 0 ? (
@@ -1810,6 +1684,7 @@ export default function AdvancedDateRangePicker({
                         {renderYearsGrid(yearsViewDecade)}
                       </div>
                       <div ref={rightCalendarRef}>
+                        dsdsdsdsd
                         <DayPicker
                           mode="range"
                           navLayout="around"
@@ -1887,8 +1762,7 @@ export default function AdvancedDateRangePicker({
                       disabled={dayPickerDisabledMatcher}
                       modifiersClassNames={{
                         selected: "rdp-day_selected",
-                        disabled:
-                          "rdp-day_disabled opacity-30 bg-gray-100 text-black",
+                        disabled: "rdp-day_disabled text-black",
                       }}
                       classNames={{
                         chevron: "fill-black",
@@ -1915,6 +1789,7 @@ export default function AdvancedDateRangePicker({
                       {renderMonthsGrid(monthsViewYear)}
                     </div>
                     <div ref={rightCalendarRef}>
+                      dddd
                       <DayPicker
                         mode="range"
                         navLayout="around"
@@ -1949,6 +1824,7 @@ export default function AdvancedDateRangePicker({
                   // When monthsViewIndex === 1, show single calendar on left and months grid on right
                   <>
                     <div ref={leftCalendarRef}>
+                      dsds
                       <DayPicker
                         mode="range"
                         navLayout="around"
@@ -2015,10 +1891,6 @@ export default function AdvancedDateRangePicker({
                     excludeEnabled &&
                     excludeFilterTypes.includes("days") &&
                     excludedWeekdays.includes(date.getDay());
-                  const isSpecificDateExcluded =
-                    excludeEnabled &&
-                    excludeFilterTypes.includes("specific-date") &&
-                    excludedSpecificDates.includes(formatUtc(date));
 
                   const isInExcludedSavedDate =
                     excludeEnabled &&
@@ -2076,20 +1948,8 @@ export default function AdvancedDateRangePicker({
                       return false;
                     });
 
-                  const isInExcludedDateRange =
-                    excludeEnabled &&
-                    excludeFilterTypes.includes("date-range") &&
-                    excludedDateRanges.some((range) => {
-                      const dateStr = formatUtc(date);
-                      return dateStr >= range.start && dateStr <= range.end;
-                    });
-
                   return (
-                    isFutureDate ||
-                    isWeekdayExcluded ||
-                    isSpecificDateExcluded ||
-                    isInExcludedSavedDate ||
-                    isInExcludedDateRange
+                    isFutureDate || isWeekdayExcluded || isInExcludedSavedDate
                   );
                 }}
                 modifiersClassNames={{
