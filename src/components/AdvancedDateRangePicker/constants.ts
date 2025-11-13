@@ -1,0 +1,33 @@
+export type SupportedExcludeFilterType = "days" | "saved-dates";
+
+export const WEEKDAY_LABELS = [
+  { value: 0, label: "Su" },
+  { value: 1, label: "Mo" },
+  { value: 2, label: "Tu" },
+  { value: 3, label: "We" },
+  { value: 4, label: "Th" },
+  { value: 5, label: "Fr" },
+  { value: 6, label: "Sa" },
+];
+
+export const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+export const DEFAULT_PICKER_HEIGHT =
+  "var(--adrp-container-height, min(720px, 85vh))";
+
+export const DEFAULT_PICKER_WIDTH =
+  "var(--adrp-container-width, min(1200px, 98vw))";
+
