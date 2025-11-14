@@ -396,13 +396,13 @@ export default function CalendarSection({
   );
 
   return (
-    <div className="flex gap-4 justify-center mb-4">
+    <div
+      className={`flex gap-4 justify-center mb-4 ${
+        excludeEnabled ? "excluded-enabled" : "excluded-disabled"
+      }`}
+    >
       {unit === "day" && (
-        <div
-          className={`flex gap-4 ${
-            excludeEnabled ? "excluded-enabled" : "excluded-disabled"
-          }`}
-        >
+        <div className={`flex gap-4`}>
           {yearsViewIndex !== null ? (
             yearsViewIndex === 0 ? (
               <>

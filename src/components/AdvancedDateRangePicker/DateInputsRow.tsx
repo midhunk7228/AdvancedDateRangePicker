@@ -48,6 +48,8 @@ export default function DateInputsRow({
   const [endFieldValue, setEndFieldValue] = useState<Dayjs | null>(() =>
     parseDateValue(endDateUtc)
   );
+  const [startFieldError, setStartFieldError] = useState<boolean>(false);
+  const [endFieldError, setEndFieldError] = useState<boolean>(false);
 
   useEffect(() => {
     if (durationInputRef.current) {
@@ -61,17 +63,27 @@ export default function DateInputsRow({
     }
   }, [duration]);
 
-  const getDateFieldStyles = (isActive: boolean) => ({
+  const getDateFieldStyles = (isActive: boolean, hasError: boolean) => ({
     "& .MuiOutlinedInput-root": {
       "& fieldset": {
-        borderColor: isActive ? "#3b82f6" : undefined,
+        borderColor: hasError ? undefined : isActive ? "#3b82f6" : undefined,
       },
       "&:hover fieldset": {
-        borderColor: isActive ? "#2563eb" : undefined,
+        borderColor: hasError ? undefined : isActive ? "#2563eb" : undefined,
       },
       "&.Mui-focused fieldset": {
-        borderColor: "#3b82f6",
-        boxShadow: "0 0 0 2px rgba(59,130,246,0.2)",
+        borderColor: hasError ? undefined : "#3b82f6",
+        boxShadow: hasError ? undefined : "0 0 0 2px rgba(59,130,246,0.2)",
+      },
+      "&.Mui-error fieldset": {
+        borderColor: "#d32f2f",
+      },
+      "&.Mui-error:hover fieldset": {
+        borderColor: "#d32f2f",
+      },
+      "&.Mui-error.Mui-focused fieldset": {
+        borderColor: "#d32f2f",
+        boxShadow: "0 0 0 2px rgba(211,47,47,0.2)",
       },
       "&.Mui-disabled fieldset": {
         borderColor: "#e5e7eb",
@@ -88,17 +100,30 @@ export default function DateInputsRow({
   });
 
   useEffect(() => {
-    setStartFieldValue(parseDateValue(startDateUtc));
+    const parsed = parseDateValue(startDateUtc);
+    setStartFieldValue(parsed);
+    // Clear error if date is valid or empty
+    if (!startDateUtc || (parsed && parsed.isValid())) {
+      setStartFieldError(false);
+    }
   }, [startDateUtc]);
 
   useEffect(() => {
-    setEndFieldValue(parseDateValue(endDateUtc));
+    const parsed = parseDateValue(endDateUtc);
+    setEndFieldValue(parsed);
+    // Clear error if date is valid or empty
+    if (!endDateUtc || (parsed && parsed.isValid())) {
+      setEndFieldError(false);
+    }
   }, [endDateUtc]);
 
   const handleStartChange: DateFieldProps<Dayjs>["onChange"] = (
     newValue,
     context
   ) => {
+    setStartFieldValue(newValue);
+
+    // Only update parent if there's no validation error
     if (context?.validationError == null) {
       if (!newValue) {
         onStartDateChange("");
@@ -106,13 +131,21 @@ export default function DateInputsRow({
         onStartDateChange(newValue.format("YYYY-MM-DD"));
       }
     }
-    setStartFieldValue(newValue);
+  };
+
+  const handleStartError: DateFieldProps<Dayjs>["onError"] = (error) => {
+    // MUI's onError callback is the source of truth for validation state
+    // error will be null when there's no error, or a validation error object when there is
+    setStartFieldError(error != null);
   };
 
   const handleEndChange: DateFieldProps<Dayjs>["onChange"] = (
     newValue,
     context
   ) => {
+    setEndFieldValue(newValue);
+
+    // Only update parent if there's no validation error
     if (context?.validationError == null) {
       if (!newValue) {
         onEndDateChange("");
@@ -120,7 +153,12 @@ export default function DateInputsRow({
         onEndDateChange(newValue.format("YYYY-MM-DD"));
       }
     }
-    setEndFieldValue(newValue);
+  };
+
+  const handleEndError: DateFieldProps<Dayjs>["onError"] = (error) => {
+    // MUI's onError callback is the source of truth for validation state
+    // error will be null when there's no error, or a validation error object when there is
+    setEndFieldError(error != null);
   };
 
   return (
@@ -137,6 +175,7 @@ export default function DateInputsRow({
           <DateField
             value={startFieldValue}
             onChange={handleStartChange}
+            onError={handleStartError}
             format="DD/MM/YYYY"
             disabled={excludeEnabled}
             onFocus={() => onActiveFieldChange("start")}
@@ -146,8 +185,12 @@ export default function DateInputsRow({
                 size: "small",
                 fullWidth: true,
                 variant: "outlined",
+                error: startFieldError,
                 sx: {
-                  ...getDateFieldStyles(activeDateField === "start"),
+                  ...getDateFieldStyles(
+                    activeDateField === "start",
+                    startFieldError
+                  ),
                 },
                 disabled: excludeEnabled,
               },
@@ -165,6 +208,7 @@ export default function DateInputsRow({
           <DateField
             value={endFieldValue}
             onChange={handleEndChange}
+            onError={handleEndError}
             format="DD/MM/YYYY"
             disabled={excludeEnabled}
             onFocus={() => onActiveFieldChange("end")}
@@ -174,8 +218,12 @@ export default function DateInputsRow({
                 size: "small",
                 fullWidth: true,
                 variant: "outlined",
+                error: endFieldError,
                 sx: {
-                  ...getDateFieldStyles(activeDateField === "end"),
+                  ...getDateFieldStyles(
+                    activeDateField === "end",
+                    endFieldError
+                  ),
                 },
                 disabled: excludeEnabled,
               },

@@ -353,6 +353,7 @@ export function useAdvancedDateRangeState({
     (checked: boolean) => {
       if (checked) {
         setExcludeEnabled(true);
+        setUnit("day");
         const savedState = excludeSavedStateRef.current;
         const sanitizedTypes = sanitizeExcludeFilterTypes(
           savedState.excludeFilterTypes
@@ -666,7 +667,6 @@ export function useAdvancedDateRangeState({
     setStartDateUtc("");
     setEndDateUtc("");
     setDuration(1);
-    setUnit("day");
     setExcludedWeekdays([]);
     setActiveDateField("start");
 
