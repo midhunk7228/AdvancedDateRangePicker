@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import type { DateRange, Matcher } from "react-day-picker";
 import {
   startOfMonth,
+  endOfMonth,
   startOfWeek,
   addDays,
   getYear,
@@ -590,9 +591,63 @@ export function useAdvancedDateRangeState({
   const handleUnitChange = useCallback(
     (newUnit: DateRangeUnit) => {
       if (excludeEnabled) return;
+
+      // Auto-expand date range when switching from "day" to "week"
+      // Expands to span all weeks from start date's week to end date's week
+      if (unit === "day" && newUnit === "week" && startDateUtc && endDateUtc) {
+        const startDate = parseUtc(startDateUtc);
+        const endDate = parseUtc(endDateUtc);
+
+        // Calculate week start of the start date
+        const startDateWeekStart = startOfWeek(startDate, {
+          weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+        });
+
+        // Calculate week start of the end date, then add 6 days to get week end
+        const endDateWeekStart = startOfWeek(endDate, {
+          weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+        });
+        const endDateWeekEnd = addDays(endDateWeekStart, 6);
+
+        setStartDateUtc(formatUtc(startDateWeekStart));
+        setEndDateUtc(formatUtc(endDateWeekEnd));
+        updateDisplayedMonth(formatUtc(startDateWeekStart));
+      }
+
+      // Auto-expand date range when switching from "day" to "month" or "week" to "month"
+      // Expands to span all months from start date's month to end date's month
+      if (
+        (unit === "day" && newUnit === "month") ||
+        (unit === "week" && newUnit === "month")
+      ) {
+        if (startDateUtc && endDateUtc) {
+          const startDate = parseUtc(startDateUtc);
+          const endDate = parseUtc(endDateUtc);
+
+          // Calculate month start of the start date
+          const startDateMonthStart = startOfMonth(startDate);
+
+          // Calculate month end of the end date
+          const endDateMonthEnd = endOfMonth(endDate);
+
+          setStartDateUtc(formatUtc(startDateMonthStart));
+          setEndDateUtc(formatUtc(endDateMonthEnd));
+          updateDisplayedMonth(formatUtc(startDateMonthStart));
+        }
+      }
+
+      // Clear excluded weekdays when switching from "day" to "week" or from "month" to "day"
+      // Excluded weekdays are only relevant for day unit
+      if (
+        (unit === "day" && newUnit === "week") ||
+        (unit === "month" && newUnit === "day")
+      ) {
+        setExcludedWeekdays([]);
+      }
+
       setUnit(newUnit);
     },
-    [excludeEnabled]
+    [excludeEnabled, unit, startDateUtc, endDateUtc, updateDisplayedMonth]
   );
 
   const handlePresetSelect = useCallback(
