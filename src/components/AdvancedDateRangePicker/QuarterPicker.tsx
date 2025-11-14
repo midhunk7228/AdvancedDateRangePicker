@@ -6,6 +6,7 @@ import {
   setQuarter,
   setYear,
   startOfQuarter,
+  endOfQuarter,
 } from "date-fns";
 import { parseUtc, getTodayUtc } from "../../utils/dateRange";
 import { ALLOW_FUTURE_DATES } from "../../config/dateConfig";
@@ -28,38 +29,88 @@ export default function QuarterPicker({
   const [displayYear, setDisplayYear] = useState(selectedStartYear);
   const today = parseUtc(getTodayUtc());
 
+  // Check if the range represents "today" (default when dates are cleared)
+  // When dates are cleared, monthQuarterRange defaults to todayDateObj for both from and to
+  // We detect this by checking if it's a single point that exactly matches today
+  const isDefaultTodayRange = (): boolean => {
+    // If from and to are the exact same date and that date is today, it's likely the cleared state
+    // (as opposed to a full quarter range which would span from startOfQuarter to endOfQuarter)
+    const isSinglePoint =
+      selectedRange.from.getTime() === selectedRange.to.getTime();
+    const isToday =
+      selectedRange.from.getTime() === today.getTime() &&
+      selectedRange.to.getTime() === today.getTime();
+
+    return isSinglePoint && isToday;
+  };
+
   const handleQuarterClick = (year: number, quarterIndex: number) => {
     // quarterIndex is 0-3, but date-fns expects 1-4
     if (disabled) return;
-    const clickedDate = startOfQuarter(
-      setQuarter(setYear(new Date(), year), quarterIndex + 1)
+    const quarterDate = setQuarter(setYear(new Date(), year), quarterIndex + 1);
+    const quarterStart = startOfQuarter(quarterDate);
+    const quarterEnd = endOfQuarter(quarterDate);
+
+    // If dates are cleared (default today range), just select the clicked quarter
+    if (isDefaultTodayRange()) {
+      onSelect({ from: quarterStart, to: quarterEnd });
+      return;
+    }
+
+    // Normalize the current range to quarter boundaries for comparison
+    const currentFromQuarter = getQuarter(selectedRange.from);
+    const currentFromYear = getYear(selectedRange.from);
+    const normalizedFromStart = startOfQuarter(
+      setQuarter(setYear(new Date(), currentFromYear), currentFromQuarter)
     );
 
-    // If no selection exists, start a new range
-    if (!selectedRange.from) {
-      onSelect({ from: clickedDate, to: clickedDate });
+    const currentToQuarter = getQuarter(selectedRange.to);
+    const currentToYear = getYear(selectedRange.to);
+    const normalizedToEnd = endOfQuarter(
+      setQuarter(setYear(new Date(), currentToYear), currentToQuarter)
+    );
+
+    // Check if we have a meaningful selection (not just defaulted to today)
+    // If from === to (same quarter), treat it as a single point selection (starting fresh)
+    const isSinglePoint =
+      normalizedFromStart.getTime() === normalizedToEnd.getTime();
+
+    // If it's a single point selection, start a new range with the clicked quarter
+    if (isSinglePoint) {
+      onSelect({ from: quarterStart, to: quarterEnd });
       return;
     }
 
-    // If we have a from but no to (or from === to), set the to
+    // If we have an existing range, check if we should extend it or start new
+    const clickedQuarter = quarterIndex + 1; // Convert to 1-4
+
+    // Check if clicked quarter is before the start
     if (
-      !selectedRange.to ||
-      selectedRange.from.getTime() === selectedRange.to.getTime()
+      year < currentFromYear ||
+      (year === currentFromYear && clickedQuarter < currentFromQuarter)
     ) {
-      if (clickedDate < selectedRange.from) {
-        onSelect({ from: clickedDate, to: selectedRange.from });
-      } else {
-        onSelect({ from: selectedRange.from, to: clickedDate });
-      }
+      onSelect({ from: quarterStart, to: normalizedToEnd });
       return;
     }
 
-    // If we already have a range, start a new selection
-    onSelect({ from: clickedDate, to: clickedDate });
+    // Check if clicked quarter is after the end
+    if (
+      year > currentToYear ||
+      (year === currentToYear && clickedQuarter > currentToQuarter)
+    ) {
+      onSelect({ from: normalizedFromStart, to: quarterEnd });
+      return;
+    }
+
+    // If clicked within the range, start a new selection with the clicked quarter
+    onSelect({ from: quarterStart, to: quarterEnd });
   };
 
   const isQuarterInRange = (year: number, quarterIndex: number): boolean => {
     if (!selectedRange.from || !selectedRange.to) return false;
+
+    // If it's the default today range, don't show any quarters as in range
+    if (isDefaultTodayRange()) return false;
 
     const fromQuarter = getQuarter(selectedRange.from) - 1; // Convert to 0-3
     const fromYear = getYear(selectedRange.from);
@@ -78,6 +129,10 @@ export default function QuarterPicker({
 
   const isQuarterStart = (year: number, quarterIndex: number): boolean => {
     if (!selectedRange.from) return false;
+
+    // If it's the default today range, don't show any quarters as selected
+    if (isDefaultTodayRange()) return false;
+
     const fromQuarter = getQuarter(selectedRange.from) - 1;
     const fromYear = getYear(selectedRange.from);
     return year === fromYear && quarterIndex === fromQuarter;
@@ -85,6 +140,10 @@ export default function QuarterPicker({
 
   const isQuarterEnd = (year: number, quarterIndex: number): boolean => {
     if (!selectedRange.to) return false;
+
+    // If it's the default today range, don't show any quarters as selected
+    if (isDefaultTodayRange()) return false;
+
     const toQuarter = getQuarter(selectedRange.to) - 1;
     const toYear = getYear(selectedRange.to);
     return year === toYear && quarterIndex === toQuarter;
@@ -175,4 +234,3 @@ export default function QuarterPicker({
     </div>
   );
 }
-

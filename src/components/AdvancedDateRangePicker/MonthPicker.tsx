@@ -68,6 +68,23 @@ export default function MonthPicker({
   // Get the starting year from selected range or current year
   const [displayYear, setDisplayYear] = useState(initialYear);
 
+  // Check if the range represents "today" (default when dates are cleared)
+  // When dates are cleared, monthQuarterRange defaults to todayDateObj for both from and to
+  // We detect this by checking the original selectedRange before normalization
+  // (normalizeRange converts today to startOfMonth/endOfMonth, so we can't use monthRange)
+  const isDefaultTodayRange = (): boolean => {
+    // If from and to are the exact same date and that date is today, it's likely the cleared state
+    // (as opposed to a full month range which would span from startOfMonth to endOfMonth)
+    if (!selectedRange.from || !selectedRange.to) return false;
+    
+    const isSinglePoint = selectedRange.from.getTime() === selectedRange.to.getTime();
+    const isToday =
+      selectedRange.from.getTime() === today.getTime() &&
+      selectedRange.to.getTime() === today.getTime();
+
+    return isSinglePoint && isToday;
+  };
+
   useEffect(() => {
     const normalized = normalizeRange(selectedRange);
 
@@ -110,6 +127,15 @@ export default function MonthPicker({
     const nextStartField = () => onActiveFieldChange?.("start");
     const nextEndField = () => onActiveFieldChange?.("end");
 
+    // If dates are cleared (default today range), just select the clicked month
+    if (isDefaultTodayRange()) {
+      const nextRange: MonthRange = { from: monthStart, to: monthEnd };
+      setMonthRange(nextRange);
+      onSelect({ from: monthStart });
+      nextEndField();
+      return;
+    }
+
     if (activeDateField === "end") {
       if (!monthRange.from) {
         const nextRange: MonthRange = { from: monthStart, to: monthEnd };
@@ -146,6 +172,9 @@ export default function MonthPicker({
   const isMonthInRange = (year: number, monthIndex: number): boolean => {
     if (!monthRange.from || !monthRange.to) return false;
 
+    // If it's the default today range, don't show any months as in range
+    if (isDefaultTodayRange()) return false;
+
     const fromMonth = getMonth(monthRange.from);
     const fromYear = getYear(monthRange.from);
     const toMonth = getMonth(monthRange.to);
@@ -160,6 +189,10 @@ export default function MonthPicker({
 
   const isMonthStart = (year: number, monthIndex: number): boolean => {
     if (!monthRange.from) return false;
+
+    // If it's the default today range, don't show any months as selected
+    if (isDefaultTodayRange()) return false;
+
     const fromMonth = getMonth(monthRange.from);
     const fromYear = getYear(monthRange.from);
     return year === fromYear && monthIndex === fromMonth;
@@ -167,6 +200,10 @@ export default function MonthPicker({
 
   const isMonthEnd = (year: number, monthIndex: number): boolean => {
     if (!monthRange.to) return false;
+
+    // If it's the default today range, don't show any months as selected
+    if (isDefaultTodayRange()) return false;
+
     const toMonth = getMonth(monthRange.to);
     const toYear = getYear(monthRange.to);
     return year === toYear && monthIndex === toMonth;
