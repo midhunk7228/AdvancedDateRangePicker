@@ -147,3 +147,11 @@ body {
   background-color: #f3f3f3 !important;
   color: #1f2937 !important;
 }
+
+.rdp-button_previous {
+  height: 32px !important;
+}
+
+.rdp-button_next {
+  height: 32px !important;
+}

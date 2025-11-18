@@ -456,9 +456,14 @@ export default function CalendarSection({
     },
     nav_button_previous: {
       marginRight: "6px",
+      height: "32px",
     },
     nav_button_next: {
       marginLeft: "6px",
+      height: "32px",
+    },
+    month_caption: {
+      height: "32px",
     },
   } as const;
 
@@ -593,7 +598,7 @@ export default function CalendarSection({
                   },
                   month_grid: {
                     borderCollapse: "separate",
-                    borderSpacing: "0 0.40rem",
+                    borderSpacing: "0 0.10rem",
                     width: "100%",
                   },
                   table: {
@@ -721,7 +726,7 @@ export default function CalendarSection({
             ...BASE_DAY_PICKER_STYLES,
             month_grid: {
               borderCollapse: "separate",
-              borderSpacing: "0 0.40rem",
+              borderSpacing: "0 0.10rem",
             },
             cell: {
               padding: "0.25rem 0",

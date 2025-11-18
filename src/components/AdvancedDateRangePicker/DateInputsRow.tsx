@@ -65,11 +65,19 @@ export default function DateInputsRow({
 
   const getDateFieldStyles = (isActive: boolean, hasError: boolean) => ({
     "& .MuiOutlinedInput-root": {
+      backgroundColor: excludeEnabled
+        ? "#f3f4f6"
+        : isActive
+        ? "#ffffff"
+        : "#f9fafb",
       "& fieldset": {
         borderColor: hasError ? undefined : isActive ? "#3b82f6" : undefined,
       },
       "&:hover fieldset": {
         borderColor: hasError ? undefined : isActive ? "#2563eb" : undefined,
+      },
+      "&.Mui-focused": {
+        backgroundColor: excludeEnabled ? "#f3f4f6" : "#ffffff",
       },
       "&.Mui-focused fieldset": {
         borderColor: hasError ? undefined : "#3b82f6",
@@ -84,6 +92,9 @@ export default function DateInputsRow({
       "&.Mui-error.Mui-focused fieldset": {
         borderColor: "#d32f2f",
         boxShadow: "0 0 0 2px rgba(211,47,47,0.2)",
+      },
+      "&.Mui-disabled": {
+        backgroundColor: "#f3f4f6",
       },
       "&.Mui-disabled fieldset": {
         borderColor: "#e5e7eb",
@@ -272,7 +283,9 @@ export default function DateInputsRow({
               value={duration}
               onChange={(e) => onDurationChange(Number(e.target.value))}
               disabled={excludeEnabled}
-              className="w-[120px] h-[28px] pl-3 pr-10 py-2 text-gray-500 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed disabled:focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
+              className={`w-[120px] h-[28px] pl-3 pr-10 py-2 text-gray-500 border border-gray-300 rounded-md text-[12px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed disabled:focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield] ${
+                excludeEnabled ? "bg-gray-100" : "bg-[#f9fafb]"
+              }`}
             />
             <span
               className={`absolute top-1/2 -translate-y-1/2 text-[12px] pointer-events-none ${
