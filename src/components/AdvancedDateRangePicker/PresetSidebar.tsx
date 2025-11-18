@@ -124,19 +124,19 @@ export default function PresetSidebar({
 
   return (
     <div
-      className={`w-44 bg-white border-r border-gray-200 py-4 flex flex-col h-full overflow-hidden ${
+      className={`w-44 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden ${
         disabled ? "opacity-60" : ""
       }`}
       style={{ ...themeColors }}
     >
       {/* Default Presets */}
-      <div className="mb-3 px-3 flex-shrink-0">
+      <div className="mb-1 mt-4 px-3 flex-shrink-0">
         {/* <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs font-semibold text-gray-600 uppercase">
             Quick Select
           </h3>
         </div> */}
-        <div className="flex flex-col w-">
+        <div className="flex flex-col">
           {Object.values(presets).map((preset) => {
             const { startDateUtc, endDateUtc } = preset.getValue();
             return (
@@ -172,7 +172,7 @@ export default function PresetSidebar({
 
       {/* Saved Dates Section */}
       <div className="flex flex-col flex-1 min-h-0 border-t border-gray-200 px-3">
-        <div className="flex items-center justify-between mb-2 flex-shrink-0 mt-3">
+        <div className="flex items-center justify-between mb-3 flex-shrink-0 mt-3">
           <div className="flex items-center gap-1">
             <h3 className="text-xs font-semibold text-[#757575]">
               Saved Dates
@@ -203,7 +203,7 @@ export default function PresetSidebar({
             No saved dates yet
           </p>
         ) : (
-          <div className="space-y-2 mb-3 overflow-y-auto flex-1 min-h-0">
+          <div className="space-y-3 mb-3 overflow-y-auto flex-1 min-h-0">
             {savedDates.map((saved) => (
               <div
                 key={saved.id}
@@ -309,7 +309,7 @@ export default function PresetSidebar({
             setShowSaveModal(true);
           }}
           disabled={disabled}
-          className={`w-full flex-shrink-0 px-1 py-2 text-[#003DB8] opacity-50 hover:opacity-100 text-xs font-medium rounded-md transition-colors flex items-center justify-center mt-auto ${
+          className={`w-full flex-shrink-0 px-1 py-4 text-[#003DB8] opacity-50 hover:opacity-100 text-xs font-medium rounded-md transition-colors flex items-center justify-center mt-auto ${
             disabled ? "cursor-not-allowed" : ""
           }`}
         >

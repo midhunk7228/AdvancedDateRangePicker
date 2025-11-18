@@ -102,6 +102,8 @@ export default function CalendarSection({
       if (existingMonthSpan) {
         const textContent = captionElement.textContent || "";
         captionElement.style.gap = "6px";
+        captionElement.style.fontSize = "14px";
+        captionElement.style.fontWeight = "600";
 
         let year = "";
         if (existingYearSpan) {
@@ -395,6 +397,22 @@ export default function CalendarSection({
     </div>
   );
 
+  const BASE_DAY_CELL_STYLES = {
+    day: {
+      width: "32px",
+      height: "28px",
+      padding: 0,
+    },
+    day_button: {
+      width: "32px",
+      height: "28px",
+      padding: 0,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  } as const;
+
   return (
     <div
       className={`flex gap-4 justify-center mb-4 ${
@@ -440,6 +458,7 @@ export default function CalendarSection({
                     classNames={{
                       chevron: "fill-black",
                     }}
+                    styles={BASE_DAY_CELL_STYLES}
                   />
                 </div>
               </>
@@ -467,6 +486,7 @@ export default function CalendarSection({
                     classNames={{
                       chevron: "fill-black",
                     }}
+                    styles={BASE_DAY_CELL_STYLES}
                   />
                 </div>
                 <div
@@ -478,7 +498,11 @@ export default function CalendarSection({
               </>
             )
           ) : monthsViewIndex === null ? (
-            <div ref={leftCalendarRef}>
+            <div
+              ref={leftCalendarRef}
+              className="w-full"
+              style={{ minWidth: 0 }}
+            >
               <DayPicker
                 mode="range"
                 navLayout="around"
@@ -491,6 +515,7 @@ export default function CalendarSection({
                 onMonthChange={setDisplayedMonth}
                 numberOfMonths={2}
                 disabled={dayPickerDisabledMatcher}
+                className="text-xs"
                 modifiersClassNames={{
                   selected: "rdp-day_selected",
                   disabled: "rdp-day_disabled text-black",
@@ -501,12 +526,33 @@ export default function CalendarSection({
                   chevron: "fill-black",
                 }}
                 styles={{
+                  ...BASE_DAY_CELL_STYLES,
+                  months: {
+                    display: "flex",
+                    flexDirection: "row",
+                    flexWrap: "nowrap",
+                    justifyContent: "space-between",
+                    gap: "24px",
+                    width: "100%",
+                  },
+                  month: {
+                    width: "calc((100% - 32px) / 2)",
+                    minWidth: "224px",
+                    maxWidth: "260px",
+                  },
+                  caption: {
+                    paddingBottom: "8px",
+                  },
                   month_grid: {
                     borderCollapse: "separate",
                     borderSpacing: "0 0.40rem",
+                    width: "100%",
+                  },
+                  table: {
+                    width: "100%",
                   },
                   cell: {
-                    padding: "0.25rem 0",
+                    padding: "0.10rem 0",
                     backgroundClip: "content-box",
                   },
                 }}
@@ -548,6 +594,7 @@ export default function CalendarSection({
                   classNames={{
                     chevron: "fill-black",
                   }}
+                  styles={BASE_DAY_CELL_STYLES}
                 />
               </div>
             </>
@@ -574,6 +621,7 @@ export default function CalendarSection({
                   classNames={{
                     chevron: "fill-black",
                   }}
+                  styles={BASE_DAY_CELL_STYLES}
                 />
               </div>
               <div
@@ -626,6 +674,7 @@ export default function CalendarSection({
             chevron: "fill-black",
           }}
           styles={{
+            ...BASE_DAY_CELL_STYLES,
             month_grid: {
               borderCollapse: "separate",
               borderSpacing: "0 0.40rem",
