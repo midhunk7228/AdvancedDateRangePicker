@@ -475,7 +475,7 @@ export default function CalendarSection({
     <div
       className={`flex gap-4 justify-center mb-4 h-[264px] ${
         excludeEnabled ? "excluded-enabled" : "excluded-disabled"
-      }`}
+      } ${unit}-picker-calender`}
     >
       {unit === "day" && (
         <div className={`flex gap-4`}>
@@ -723,16 +723,45 @@ export default function CalendarSection({
             excludedWeekday: "rdp-day_excluded-weekday",
             "excluded-saved-date": "rdp-day_excluded-saved-date",
           }}
+          className="text-xs"
           classNames={dayPickerClassNames}
           styles={{
             ...BASE_DAY_PICKER_STYLES,
+            months: {
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "nowrap",
+              justifyContent: "space-between",
+              gap: "24px",
+              width: "100%",
+            },
+            month: {
+              width: "252px",
+              // width: "calc((100% - 24px) / 2)",
+              minWidth: "224px",
+              maxWidth: "260px",
+              height: "256px",
+            },
+            caption: {
+              ...BASE_DAY_PICKER_STYLES.caption,
+              paddingBottom: "8px",
+            },
             month_grid: {
               borderCollapse: "separate",
               borderSpacing: "0 0.25rem",
+              width: "100%",
+            },
+            table: {
+              width: "100%",
             },
             cell: {
-              padding: "0.25rem 0",
+              padding: "0.10rem 0",
               backgroundClip: "content-box",
+            },
+            caption_label: {
+              fontSize: "14px !important",
+              fontWeight: "600",
+              lineHeight: "1",
             },
           }}
         />

@@ -155,3 +155,36 @@ body {
 .rdp-button_next {
   height: 32px !important;
 }
+
+.rdp-week_number {
+  height: 28px !important;
+  font-size: 10px !important;
+}
+.week-picker-calender .rdp-caption_label {
+  cursor: pointer; font-size: 14px !important; font-weight: 600;
+}
+.week-picker-calender .rdp-button_previous {
+  margin-left: 27px;
+}
+.week-picker-calender .rdp-button_previous + .rdp-month_caption {
+  margin-left: 55px !important;
+}
+.week-picker-calender .rdp-month:has(.rdp-button_next) .rdp-month_caption {
+   margin-left: 22px !important;
+}
+.week-picker-calender .rdp-button_next {
+  margin-right: 25px !important;
+}
+.rdp-caption_label {
+  gap: 3px !important
+}
+
+.day-picker-calender .rdp-caption_label {
+  cursor: pointer; font-size: 14px !important; font-weight: 600;
+}
+/* .week-picker-calender .rdp-button_previous {
+  margin-left: 27px;
+} */
+/* .week-picker-calender .rdp-caption_label {
+    margin-left: 27px;
+} */
