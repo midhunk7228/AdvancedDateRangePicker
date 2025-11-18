@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   getQuarter,
@@ -157,10 +157,44 @@ export default function QuarterPicker({
     return quarterDate > today;
   };
 
-  const renderYear = (year: number) => {
+  const renderYear = (
+    year: number,
+    showLeftChevron: boolean,
+    showRightChevron: boolean,
+    style?: React.CSSProperties
+  ) => {
     return (
-      <div key={year} className="flex-1">
-        <div className="text-center font-semibold text-lg mb-4">{year}</div>
+      <div key={year} style={{ width: "224px", height: "256px" }}>
+        <div
+          className="flex items-center justify-center gap-2 mb-4"
+          style={{ ...style }}
+        >
+          {showLeftChevron && (
+            <button
+              onClick={() => !disabled && setDisplayYear(displayYear - 1)}
+              disabled={disabled}
+              className={`p-1 rounded-md transition-colors ${
+                disabled ? "cursor-not-allowed opacity-40" : "hover:bg-gray-100"
+              }`}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          )}
+          <div className="text-center font-semibold text-sm px-3 py-1 rounded-md">
+            {year}
+          </div>
+          {showRightChevron && (
+            <button
+              onClick={() => !disabled && setDisplayYear(displayYear + 1)}
+              disabled={disabled}
+              className={`p-1 rounded-md transition-colors ${
+                disabled ? "cursor-not-allowed opacity-40" : "hover:bg-gray-100"
+              }`}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-2 gap-3">
           {QUARTERS.map((quarter, index) => {
             const inRange = isQuarterInRange(year, index);
@@ -183,9 +217,9 @@ export default function QuarterPicker({
                     futureQuarter || disabled
                       ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed"
                       : isSelected
-                      ? "bg-blue-600 text-white"
+                      ? "bg-[#003DB8] text-white"
                       : inRange
-                      ? "bg-blue-100 text-blue-900"
+                      ? "bg-[#CEDBF5] text-[#1F1F1F]"
                       : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                   }
                 `}
@@ -201,35 +235,16 @@ export default function QuarterPicker({
 
   return (
     <div className="w-full">
-      {/* Navigation */}
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={() => !disabled && setDisplayYear(displayYear - 1)}
-          disabled={disabled}
-          className={`p-2 rounded-md transition-colors ${
-            disabled ? "cursor-not-allowed opacity-40" : "hover:bg-gray-100"
-          }`}
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <div className="text-lg font-semibold">
-          {displayYear} - {displayYear + 1}
-        </div>
-        <button
-          onClick={() => !disabled && setDisplayYear(displayYear + 1)}
-          disabled={disabled}
-          className={`p-2 rounded-md transition-colors ${
-            disabled ? "cursor-not-allowed opacity-40" : "hover:bg-gray-100"
-          }`}
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Two Year Grids */}
-      <div className="flex gap-8">
-        {renderYear(displayYear)}
-        {renderYear(displayYear + 1)}
+      {/* Two Year Grids with Navigation */}
+      <div className="flex gap-8 justify-between px-6">
+        {renderYear(displayYear, true, false, {
+          justifyContent: "start",
+          gap: "3rem",
+        })}
+        {renderYear(displayYear + 1, false, true, {
+          justifyContent: "end",
+          gap: "3rem",
+        })}
       </div>
     </div>
   );
