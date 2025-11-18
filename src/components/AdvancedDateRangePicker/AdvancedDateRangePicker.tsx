@@ -106,13 +106,12 @@ export default function AdvancedDateRangePicker({
   });
 
   const containerStyle: CSSProperties = {
-    height: DEFAULT_PICKER_HEIGHT,
+    height: "auto",
     minHeight: DEFAULT_PICKER_HEIGHT,
-    maxHeight: DEFAULT_PICKER_HEIGHT,
     width: DEFAULT_PICKER_WIDTH,
     minWidth: DEFAULT_PICKER_WIDTH,
     maxWidth: DEFAULT_PICKER_WIDTH,
-    overflow: "hidden",
+    overflow: "visible",
     ...themeColors,
   };
 
@@ -144,7 +143,7 @@ export default function AdvancedDateRangePicker({
       />
 
       <div className="flex-1 flex flex-col min-h-0">
-        <div className="pt-4 overflow-y-auto overflow-x-hidden flex-1">
+        <div className="pt-4 flex-1">
           <UnitTabs
             unit={unit}
             excludeEnabled={excludeEnabled}
