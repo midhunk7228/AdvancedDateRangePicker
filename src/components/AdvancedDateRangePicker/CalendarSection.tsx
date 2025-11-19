@@ -54,6 +54,7 @@ interface CalendarSectionProps {
   onMonthSelect: (year: number, monthIndex: number) => void;
   onYearSelect: (year: number) => void;
   todayDateObj: Date;
+  onDayClick: (date: Date) => void;
 }
 
 export default function CalendarSection({
@@ -81,6 +82,7 @@ export default function CalendarSection({
   onMonthSelect,
   onYearSelect,
   todayDateObj,
+  onDayClick,
 }: CalendarSectionProps) {
   const leftCalendarRef = useRef<HTMLDivElement>(null);
   const rightCalendarRef = useRef<HTMLDivElement>(null);
@@ -506,13 +508,23 @@ export default function CalendarSection({
                     }}
                     numberOfMonths={1}
                     disabled={dayPickerDisabledMatcher}
+                    onDayClick={onDayClick}
                     modifiersClassNames={{
                       selected: "rdp-day_selected bg-[#003DB8]",
                       disabled:
                         "rdp-day_disabled opacity-30 bg-gray-100 text-black",
                       excludedWeekday: "rdp-day_excluded-weekday",
                       "excluded-saved-date": "rdp-day_excluded-saved-date",
+                      "excluded-specific-date":
+                        "rdp-day_excluded-specific-date",
                     }}
+                    // modifiersStyles={{
+                    //   "excluded-specific-date": {
+                    //     textDecoration: "line-through",
+                    //     color: "#ef4444",
+                    //     fontWeight: "bold",
+                    //   },
+                    // }}
                     classNames={dayPickerClassNames}
                     styles={BASE_DAY_PICKER_STYLES}
                   />
@@ -536,8 +548,9 @@ export default function CalendarSection({
                       disabled:
                         "rdp-day_disabled opacity-30 bg-gray-100 text-black",
                       excludedWeekday: "rdp-day_excluded-weekday",
-
                       "excluded-saved-date": "rdp-day_excluded-saved-date",
+                      "excluded-specific-date":
+                        "rdp-day_excluded-specific-date",
                     }}
                     classNames={dayPickerClassNames}
                     styles={BASE_DAY_PICKER_STYLES}
@@ -570,12 +583,21 @@ export default function CalendarSection({
                 numberOfMonths={2}
                 disabled={dayPickerDisabledMatcher}
                 className="text-xs"
+                onDayClick={onDayClick}
                 modifiersClassNames={{
                   selected: "rdp-day_selected",
                   disabled: "rdp-day_disabled text-black",
                   excludedWeekday: "rdp-day_excluded-weekday",
                   "excluded-saved-date": "rdp-day_excluded-saved-date",
+                  "excluded-specific-date": "rdp-day_excluded-specific-date",
                 }}
+                // modifiersStyles={{
+                //   "excluded-specific-date": {
+                //     textDecoration: "line-through",
+                //     color: "#ef4444",
+                //     fontWeight: "bold",
+                //   },
+                // }}
                 classNames={dayPickerClassNames}
                 styles={{
                   ...BASE_DAY_PICKER_STYLES,
@@ -645,6 +667,7 @@ export default function CalendarSection({
                       "rdp-day_disabled opacity-30 bg-gray-100 text-black",
                     excludedWeekday: "rdp-day_excluded-weekday",
                     "excluded-saved-date": "rdp-day_excluded-saved-date",
+                    "excluded-specific-date": "rdp-day_excluded-specific-date",
                   }}
                   classNames={dayPickerClassNames}
                   styles={BASE_DAY_PICKER_STYLES}
@@ -670,6 +693,7 @@ export default function CalendarSection({
                       "rdp-day_disabled opacity-30 bg-gray-100 text-black",
                     excludedWeekday: "rdp-day_excluded-weekday",
                     "excluded-saved-date": "rdp-day_excluded-saved-date",
+                    "excluded-specific-date": "rdp-day_excluded-specific-date",
                   }}
                   classNames={{
                     chevron: "fill-black",
@@ -717,11 +741,20 @@ export default function CalendarSection({
           onMonthChange={setDisplayedMonth}
           numberOfMonths={2}
           disabled={(date) => dayPickerDisabledMatcher(date)}
+          onDayClick={onDayClick}
           modifiersClassNames={{
             selected: "rdp-day_selected bg-[#003DB8]",
             disabled: "rdp-day_disabled opacity-30 bg-gray-100 text-black",
             excludedWeekday: "rdp-day_excluded-weekday",
             "excluded-saved-date": "rdp-day_excluded-saved-date",
+            "excluded-specific-date": "rdp-day_excluded-specific-date",
+          }}
+          modifiersStyles={{
+            "excluded-specific-date": {
+              textDecoration: "line-through",
+              color: "#ef4444",
+              fontWeight: "bold",
+            },
           }}
           className="text-xs"
           classNames={dayPickerClassNames}

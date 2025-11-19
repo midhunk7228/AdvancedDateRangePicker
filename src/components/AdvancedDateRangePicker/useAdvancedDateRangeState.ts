@@ -61,7 +61,7 @@ export function useAdvancedDateRangeState({
     initialSelection?.excludeFilterTypes || []
   ).filter(
     (type): type is SupportedExcludeFilterType =>
-      type === "days" || type === "saved-dates"
+      type === "days" || type === "saved-dates" || type === "date-range"
   );
 
   const [unit, setUnit] = useState<DateRangeUnit>(
@@ -128,6 +128,10 @@ export function useAdvancedDateRangeState({
   const [savedDatesForFilter, setSavedDatesForFilter] = useState<
     SavedDateRange[]
   >([]);
+
+  const [tempExcludedRange, setTempExcludedRange] = useState<
+    DateRange | undefined
+  >(undefined);
 
   const [displayedMonth, setDisplayedMonth] = useState<Date>(() => {
     if (initialSelection?.startDateUtc) {
@@ -277,8 +281,18 @@ export function useAdvancedDateRangeState({
       modifiers["excluded-saved-date"] = isDateExcludedBySavedDates;
     }
 
+    if (excludedSpecificDates.length > 0) {
+      modifiers["excluded-specific-date"] = (date) =>
+        excludedSpecificDates.includes(formatUtc(date));
+    }
+
     return modifiers;
-  }, [excludedSavedDates, excludedWeekdays, isDateExcludedBySavedDates]);
+  }, [
+    excludedSavedDates,
+    excludedWeekdays,
+    isDateExcludedBySavedDates,
+    excludedSpecificDates,
+  ]);
 
   const selectedRange: DateRange = useMemo(
     () => ({
@@ -347,7 +361,7 @@ export function useAdvancedDateRangeState({
     (types: AnyExcludeFilterType[]): SupportedExcludeFilterType[] =>
       types.filter(
         (type): type is SupportedExcludeFilterType =>
-          type === "days" || type === "saved-dates"
+          type === "days" || type === "saved-dates" || type === "date-range"
       ),
     []
   );
@@ -421,6 +435,9 @@ export function useAdvancedDateRangeState({
       if (type === "saved-dates") {
         setExcludedSavedDates([]);
       }
+      if (type === "date-range") {
+        setExcludedDateRanges([]);
+      }
 
       if (activeFilterView === type) {
         const fallback = nextTypes.find(
@@ -456,6 +473,7 @@ export function useAdvancedDateRangeState({
   const handleExcludeSave = useCallback(() => {
     const includeWeekDays = excludedWeekdays.length > 0;
     const includeSavedDates = excludedSavedDates.length > 0;
+    const includeDateRanges = excludedDateRanges.length > 0;
 
     const nextTypes: SupportedExcludeFilterType[] = [];
     if (includeWeekDays) {
@@ -464,12 +482,14 @@ export function useAdvancedDateRangeState({
     if (includeSavedDates) {
       nextTypes.push("saved-dates");
     }
+    if (includeDateRanges) {
+      nextTypes.push("date-range");
+    }
 
     const nextWeekdays = includeWeekDays ? [...excludedWeekdays] : [];
     const nextSpecificDates: string[] = [];
     const nextSavedDates = includeSavedDates ? [...excludedSavedDates] : [];
-    const nextDateRanges: Array<{ id: string; start: string; end: string }> =
-      [];
+    const nextDateRanges = includeDateRanges ? [...excludedDateRanges] : [];
 
     excludeSavedStateRef.current = {
       excludeFilterTypes: nextTypes,
@@ -487,7 +507,7 @@ export function useAdvancedDateRangeState({
     setExcludeApplied(nextTypes.length > 0);
     setExcludeEnabled(false);
     setActiveFilterView(null);
-  }, [excludedSavedDates, excludedWeekdays]);
+  }, [excludedDateRanges, excludedSavedDates, excludedWeekdays]);
 
   const toggleWeekday = useCallback(
     (day: number) => {
@@ -626,7 +646,7 @@ export function useAdvancedDateRangeState({
 
       const restoredTypes = (selection.excludeFilterTypes || []).filter(
         (type): type is SupportedExcludeFilterType =>
-          type === "days" || type === "saved-dates"
+          type === "days" || type === "saved-dates" || type === "date-range"
       );
 
       const restoredSpecificDates = selection.excludedSpecificDates || [];
@@ -942,7 +962,11 @@ export function useAdvancedDateRangeState({
 
   const dayPickerDisabledMatcher = useCallback(
     (date: Date): boolean => {
-      if (excludeEnabled) return true;
+      if (excludeEnabled) {
+        if (!startDateUtc || !endDateUtc) return true;
+        const current = formatUtc(date);
+        return current < startDateUtc || current > endDateUtc;
+      }
       const dateStr = formatUtc(date);
 
       const isFutureDate = !ALLOW_FUTURE_DATES && dateStr > today;
@@ -965,6 +989,8 @@ export function useAdvancedDateRangeState({
       excludedWeekdays,
       isDateExcludedBySavedDates,
       today,
+      startDateUtc,
+      endDateUtc,
     ]
   );
 
@@ -1004,6 +1030,27 @@ export function useAdvancedDateRangeState({
       setYearsViewDecade(Math.floor(year / 10) * 10);
     },
     [displayedMonth]
+  );
+
+  const handleDayClick = useCallback(
+    (date: Date) => {
+      debugger;
+      if (!excludeEnabled) return;
+
+      const dateStr = formatUtc(date);
+
+      if (startDateUtc && endDateUtc) {
+        if (dateStr < startDateUtc || dateStr > endDateUtc) return;
+      }
+
+      setExcludedSpecificDates((current) => {
+        if (current.includes(dateStr)) {
+          return current.filter((d) => d !== dateStr);
+        }
+        return [...current, dateStr];
+      });
+    },
+    [excludeEnabled, startDateUtc, endDateUtc]
   );
 
   return {
@@ -1063,11 +1110,13 @@ export function useAdvancedDateRangeState({
     handleExcludeSave,
     toggleWeekday,
     setExcludedSavedDates,
+    setExcludedDateRanges,
     setExcludeFilterTypes,
     setActiveFilterView,
     excludeSavedStateRef,
     sanitizeExcludeFilterTypes,
     handleMonthSelect,
     handleYearSelect,
+    handleDayClick,
   };
 }

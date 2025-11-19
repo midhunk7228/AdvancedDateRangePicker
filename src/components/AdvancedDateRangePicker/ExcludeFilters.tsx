@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useMemo } from "react";
-import { ChevronDown, Bookmark, Search, X } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ChevronDown, Bookmark, Search, X, Calendar } from "lucide-react";
 import type { SavedDateRange } from "../../types/dateRange";
 import {
   WEEKDAY_LABELS,
@@ -14,6 +14,7 @@ interface ExcludeFiltersProps {
   activeFilterView: SupportedExcludeFilterType | null;
   excludedWeekdays: number[];
   excludedSavedDates: string[];
+  excludedDateRanges: Array<{ id: string; start: string; end: string }>;
   savedDatesSearchTerm: string;
   filteredSavedDates: SavedDateRange[];
   savedDatesForFilter: SavedDateRange[];
@@ -25,6 +26,9 @@ interface ExcludeFiltersProps {
   onToggleWeekday: (day: number) => void;
   setSavedDatesSearchTerm: (value: string) => void;
   setExcludedSavedDates: Dispatch<SetStateAction<string[]>>;
+  setExcludedDateRanges: Dispatch<
+    SetStateAction<Array<{ id: string; start: string; end: string }>>
+  >;
   setExcludeFilterTypes: Dispatch<SetStateAction<SupportedExcludeFilterType[]>>;
   setActiveFilterView: Dispatch<
     SetStateAction<SupportedExcludeFilterType | null>
@@ -37,6 +41,7 @@ export default function ExcludeFilters({
   activeFilterView,
   excludedWeekdays,
   excludedSavedDates,
+  excludedDateRanges,
   savedDatesSearchTerm,
   filteredSavedDates,
   onExcludeToggle,
@@ -47,6 +52,7 @@ export default function ExcludeFilters({
   onToggleWeekday,
   setSavedDatesSearchTerm,
   setExcludedSavedDates,
+  setExcludedDateRanges,
   setExcludeFilterTypes,
   setActiveFilterView,
   savedDatesForFilter,
@@ -101,6 +107,18 @@ export default function ExcludeFilters({
       if (next.length === 0) {
         setExcludeFilterTypes((types) =>
           types.filter((t) => t !== "saved-dates")
+        );
+      }
+      return next;
+    });
+  };
+  console.log("excludedDateRanges", excludedDateRanges);
+  const handleRemoveDateRange = (id: string) => {
+    setExcludedDateRanges((prev) => {
+      const next = prev.filter((range) => range.id !== id);
+      if (next.length === 0) {
+        setExcludeFilterTypes((types) =>
+          types.filter((t) => t !== "date-range")
         );
       }
       return next;
@@ -316,7 +334,9 @@ export default function ExcludeFilters({
       </div>
 
       {/* Excluded Items Row */}
-      {(selectedWeekdays.length > 0 || selectedSavedDates.length > 0) && (
+      {(selectedWeekdays.length > 0 ||
+        selectedSavedDates.length > 0 ||
+        excludedDateRanges.length > 0) && (
         <div className="w-full border-t border-gray-200 py-3 px-4">
           <div className="flex flex-wrap gap-2">
             {selectedWeekdays.map((day) => {
@@ -365,6 +385,26 @@ export default function ExcludeFilters({
                 </span>
               );
             })}
+
+            {excludedDateRanges.map((range) => (
+              <span
+                key={range.id}
+                className="inline-flex h-7 items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
+                title={`${range.start} - ${range.end}`}
+              >
+                {range.start} - {range.end}
+                {excludeEnabled && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveDateRange(range.id)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label={`Remove range ${range.start} - ${range.end}`}
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                )}
+              </span>
+            ))}
           </div>
         </div>
       )}

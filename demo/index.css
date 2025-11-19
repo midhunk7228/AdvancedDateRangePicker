@@ -87,17 +87,17 @@ body {
   height: 100%;
 }
 
-.excluded-enabled .rdp-day_selected.rdp-range_middle.rdp-day_disabled,
-.excluded-enabled .rdp-day_selected.rdp-range_start.rdp-day_disabled,
-.excluded-enabled .rdp-day_selected.rdp-range_end.rdp-day_disabled {
+.excluded-enabled td[data-selected="true"].rdp-day_selected.rdp-range_middle,
+.excluded-enabled td[data-selected="true"].rdp-day_selected.rdp-range_start,
+.excluded-enabled td[data-selected="true"].rdp-day_selected.rdp-range_end {
   background-color: #003db8 !important;
   color: white !important;
 }
 .excluded-enabled
-  .rdp-day_selected.rdp-range_start.rdp-day_disabled
+  td[data-selected="true"].rdp-day_selected.rdp-range_start
   .rdp-day_button,
 .excluded-enabled
-  .rdp-day_selected.rdp-range_end.rdp-day_disabled
+  td[data-selected="true"].rdp-day_selected.rdp-range_end
   .rdp-day_button {
   background-color: #003db8 !important;
   color: white !important;
@@ -107,23 +107,35 @@ body {
 }
 
 .excluded-enabled
-  .rdp-day_selected.rdp-range_middle.rdp-day_disabled.rdp-day_excluded-weekday,
+  td[data-selected="true"].rdp-day_selected.rdp-range_middle.rdp-day_excluded-weekday,
 .excluded-enabled
-  .rdp-day_selected.rdp-range_start.rdp-day_disabled.rdp-day_excluded-weekday
+  td[data-selected="true"].rdp-day_selected.rdp-range_start.rdp-day_excluded-weekday
   .rdp-day_button,
 .excluded-enabled
-  .rdp-day_selected.rdp-range_end.rdp-day_disabled.rdp-day_excluded-weekday
+  td[data-selected="true"].rdp-day_selected.rdp-range_end.rdp-day_excluded-weekday
   .rdp-day_button {
   background-color: #f3f3f3 !important;
   color: #1f2937 !important;
 }
 
 .excluded-enabled
-  .rdp-day_selected.rdp-range_middle.rdp-day_disabled.rdp-day_excluded-saved-date,
+  td[data-selected="true"].rdp-day_selected.rdp-range_middle.rdp-day_excluded-saved-date,
 .excluded-enabled
-  .rdp-day_selected.rdp-range_start.rdp-day_disabled.rdp-day_excluded-saved-date,
+  td[data-selected="true"].rdp-day_selected.rdp-range_start.rdp-day_excluded-saved-date,
 .excluded-enabled
-  .rdp-day_selected.rdp-range_end.rdp-day_disabled.rdp-day_excluded-saved-date {
+  td[data-selected="true"].rdp-day_selected.rdp-range_end.rdp-day_excluded-saved-date {
+  background-color: #f3f3f3 !important;
+  color: #1f2937 !important;
+}
+
+.excluded-enabled
+  td[data-selected="true"].rdp-day_selected.rdp-range_middle.rdp-day_excluded-specific-date,
+.excluded-enabled
+  td[data-selected="true"].rdp-day_selected.rdp-range_start.rdp-day_excluded-specific-date
+  .rdp-day_button,
+.excluded-enabled
+  td[data-selected="true"].rdp-day_selected.rdp-range_end.rdp-day_excluded-specific-date
+  .rdp-day_button {
   background-color: #f3f3f3 !important;
   color: #1f2937 !important;
 }
