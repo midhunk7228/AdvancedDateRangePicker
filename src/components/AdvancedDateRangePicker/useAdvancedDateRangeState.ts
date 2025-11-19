@@ -594,8 +594,12 @@ export function useAdvancedDateRangeState({
     (newUnit: DateRangeUnit) => {
       if (excludeEnabled) return;
       setUnit(newUnit);
+
+      if ((newUnit === "day" || newUnit === "week") && startDateUtc) {
+        setDisplayedMonth(startOfMonth(parseUtc(startDateUtc)));
+      }
     },
-    [excludeEnabled]
+    [excludeEnabled, startDateUtc]
   );
 
   const handlePresetSelect = useCallback(
