@@ -474,8 +474,9 @@ export function useAdvancedDateRangeState({
     const includeWeekDays = excludedWeekdays.length > 0;
     const includeSavedDates = excludedSavedDates.length > 0;
     const includeDateRanges = excludedDateRanges.length > 0;
+    const includeSpecificDates = excludedSpecificDates.length > 0;
 
-    const nextTypes: SupportedExcludeFilterType[] = [];
+    const nextTypes: AnyExcludeFilterType[] = [];
     if (includeWeekDays) {
       nextTypes.push("days");
     }
@@ -485,9 +486,14 @@ export function useAdvancedDateRangeState({
     if (includeDateRanges) {
       nextTypes.push("date-range");
     }
+    if (includeSpecificDates) {
+      nextTypes.push("specific-date");
+    }
 
     const nextWeekdays = includeWeekDays ? [...excludedWeekdays] : [];
-    const nextSpecificDates: string[] = [];
+    const nextSpecificDates = includeSpecificDates
+      ? [...excludedSpecificDates]
+      : [];
     const nextSavedDates = includeSavedDates ? [...excludedSavedDates] : [];
     const nextDateRanges = includeDateRanges ? [...excludedDateRanges] : [];
 
@@ -499,7 +505,11 @@ export function useAdvancedDateRangeState({
       excludedDateRanges: nextDateRanges,
     };
 
-    setExcludeFilterTypes(nextTypes);
+    // We only set SupportedExcludeFilterType to state because 'specific-date' is legacy/internal
+    // and doesn't have a filter button.
+    const supportedTypes = sanitizeExcludeFilterTypes(nextTypes);
+    setExcludeFilterTypes(supportedTypes);
+
     setExcludedWeekdays(nextWeekdays);
     setExcludedSpecificDates(nextSpecificDates);
     setExcludedSavedDates(nextSavedDates);
@@ -507,7 +517,13 @@ export function useAdvancedDateRangeState({
     setExcludeApplied(nextTypes.length > 0);
     setExcludeEnabled(false);
     setActiveFilterView(null);
-  }, [excludedDateRanges, excludedSavedDates, excludedWeekdays]);
+  }, [
+    excludedDateRanges,
+    excludedSavedDates,
+    excludedWeekdays,
+    excludedSpecificDates,
+    sanitizeExcludeFilterTypes,
+  ]);
 
   const toggleWeekday = useCallback(
     (day: number) => {
@@ -1034,7 +1050,6 @@ export function useAdvancedDateRangeState({
 
   const handleDayClick = useCallback(
     (date: Date) => {
-      debugger;
       if (!excludeEnabled) return;
 
       const dateStr = formatUtc(date);
@@ -1110,6 +1125,7 @@ export function useAdvancedDateRangeState({
     handleExcludeSave,
     toggleWeekday,
     setExcludedSavedDates,
+    setExcludedSpecificDates,
     setExcludedDateRanges,
     setExcludeFilterTypes,
     setActiveFilterView,

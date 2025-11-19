@@ -14,6 +14,7 @@ interface ExcludeFiltersProps {
   activeFilterView: SupportedExcludeFilterType | null;
   excludedWeekdays: number[];
   excludedSavedDates: string[];
+  excludedSpecificDates: string[];
   excludedDateRanges: Array<{ id: string; start: string; end: string }>;
   savedDatesSearchTerm: string;
   filteredSavedDates: SavedDateRange[];
@@ -26,6 +27,7 @@ interface ExcludeFiltersProps {
   onToggleWeekday: (day: number) => void;
   setSavedDatesSearchTerm: (value: string) => void;
   setExcludedSavedDates: Dispatch<SetStateAction<string[]>>;
+  setExcludedSpecificDates: Dispatch<SetStateAction<string[]>>;
   setExcludedDateRanges: Dispatch<
     SetStateAction<Array<{ id: string; start: string; end: string }>>
   >;
@@ -41,6 +43,7 @@ export default function ExcludeFilters({
   activeFilterView,
   excludedWeekdays,
   excludedSavedDates,
+  excludedSpecificDates,
   excludedDateRanges,
   savedDatesSearchTerm,
   filteredSavedDates,
@@ -52,6 +55,7 @@ export default function ExcludeFilters({
   onToggleWeekday,
   setSavedDatesSearchTerm,
   setExcludedSavedDates,
+  setExcludedSpecificDates,
   setExcludedDateRanges,
   setExcludeFilterTypes,
   setActiveFilterView,
@@ -122,6 +126,12 @@ export default function ExcludeFilters({
         );
       }
       return next;
+    });
+  };
+
+  const handleRemoveSpecificDate = (dateStr: string) => {
+    setExcludedSpecificDates((current) => {
+      return current.filter((d) => d !== dateStr);
     });
   };
 
@@ -336,7 +346,8 @@ export default function ExcludeFilters({
       {/* Excluded Items Row */}
       {(selectedWeekdays.length > 0 ||
         selectedSavedDates.length > 0 ||
-        excludedDateRanges.length > 0) && (
+        excludedDateRanges.length > 0 ||
+        excludedSpecificDates.length > 0) && (
         <div className="w-full border-t border-gray-200 py-3 px-4">
           <div className="flex flex-wrap gap-2">
             {selectedWeekdays.map((day) => {
@@ -399,6 +410,30 @@ export default function ExcludeFilters({
                     onClick={() => handleRemoveDateRange(range.id)}
                     className="text-gray-400 hover:text-gray-600 transition-colors"
                     aria-label={`Remove range ${range.start} - ${range.end}`}
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                )}
+              </span>
+            ))}
+
+            {excludedSpecificDates.map((dateStr) => (
+              <span
+                key={dateStr}
+                className="inline-flex h-7 items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
+                title={dateStr}
+              >
+                {new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+                {excludeEnabled && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSpecificDate(dateStr)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label={`Remove date ${dateStr}`}
                   >
                     <X className="h-2.5 w-2.5" />
                   </button>

@@ -96,6 +96,7 @@ export default function AdvancedDateRangePicker({
     handleExcludeSave,
     toggleWeekday,
     setExcludedSavedDates,
+    setExcludedSpecificDates,
     setExcludedDateRanges,
     setExcludeFilterTypes,
     setActiveFilterView,
@@ -181,6 +182,7 @@ export default function AdvancedDateRangePicker({
             activeFilterView={activeFilterView}
             excludedWeekdays={excludedWeekdays}
             excludedSavedDates={excludedSavedDates}
+            excludedSpecificDates={excludedSpecificDates}
             excludedDateRanges={excludedDateRanges}
             savedDatesSearchTerm={savedDatesSearchTerm}
             filteredSavedDates={filteredSavedDates}
@@ -193,6 +195,7 @@ export default function AdvancedDateRangePicker({
             onToggleWeekday={toggleWeekday}
             setSavedDatesSearchTerm={setSavedDatesSearchTerm}
             setExcludedSavedDates={setExcludedSavedDates}
+            setExcludedSpecificDates={setExcludedSpecificDates}
             setExcludedDateRanges={setExcludedDateRanges}
             setExcludeFilterTypes={setExcludeFilterTypes}
             setActiveFilterView={setActiveFilterView}
