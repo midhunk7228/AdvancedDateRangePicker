@@ -64,10 +64,17 @@ export default function ExcludeFilters({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const editButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isClickInsideCard =
+        cardRef.current && cardRef.current.contains(target);
+      const isClickOnEditButton =
+        editButtonRef.current && editButtonRef.current.contains(target);
+
+      if (!isClickInsideCard && !isClickOnEditButton) {
         setIsExpanded(false);
       }
     }
@@ -206,6 +213,7 @@ export default function ExcludeFilters({
 
         {isExpanded && (
           <button
+            ref={editButtonRef}
             type="button"
             onClick={() => {
               onExcludeToggle(true);
@@ -410,7 +418,7 @@ export default function ExcludeFilters({
         <div className="w-full border-t border-gray-200 py-3 px-4 relative">
           <div className="flex items-center w-full">
             <div className="flex flex-wrap gap-2 flex-1">
-              {(excludeEnabled
+              {(excludeEnabled || isExpanded
                 ? allExcludedItems
                 : allExcludedItems.slice(0, 4)
               ).map((item) => (
@@ -420,7 +428,7 @@ export default function ExcludeFilters({
                   title={item.title}
                 >
                   {item.label}
-                  {excludeEnabled && isEditMode && (
+                  {excludeEnabled && (
                     <button
                       type="button"
                       onClick={item.onRemove}
@@ -433,7 +441,7 @@ export default function ExcludeFilters({
                 </span>
               ))}
             </div>
-            {!excludeEnabled && allExcludedItems.length > 4 && (
+            {!excludeEnabled && !isExpanded && allExcludedItems.length > 4 && (
               <button
                 type="button"
                 onClick={() => setIsExpanded(true)}
