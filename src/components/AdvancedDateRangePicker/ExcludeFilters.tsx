@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { ChevronDown, Bookmark, Search, X, Calendar } from "lucide-react";
 import type { SavedDateRange } from "../../types/dateRange";
 import {
@@ -61,6 +61,25 @@ export default function ExcludeFilters({
   setActiveFilterView,
   savedDatesForFilter,
 }: ExcludeFiltersProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        setIsExpanded(false);
+      }
+    }
+
+    if (isExpanded) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isExpanded]);
+
   const savedDatesById = useMemo(() => {
     const map = new Map<string, SavedDateRange>();
     for (const saved of savedDatesForFilter) {
@@ -116,7 +135,6 @@ export default function ExcludeFilters({
       return next;
     });
   };
-  console.log("excludedDateRanges", excludedDateRanges);
   const handleRemoveDateRange = (id: string) => {
     setExcludedDateRanges((prev) => {
       const next = prev.filter((range) => range.id !== id);
@@ -134,6 +152,37 @@ export default function ExcludeFilters({
       return current.filter((d) => d !== dateStr);
     });
   };
+
+  const allExcludedItems = [
+    ...selectedWeekdays.map((day) => ({
+      id: `day-${day.value}`,
+      label: WEEKDAY_FULL_NAMES[day.value] ?? day.label,
+      title: WEEKDAY_FULL_NAMES[day.value] ?? day.label,
+      onRemove: () => onToggleWeekday(day.value),
+    })),
+    ...selectedSavedDates.map((saved) => ({
+      id: `saved-${saved.id}`,
+      label: getSavedDateChipLabel(saved),
+      title: formatSavedDateRange(saved),
+      onRemove: () => handleRemoveSavedDate(saved.id),
+    })),
+    ...excludedDateRanges.map((range) => ({
+      id: `range-${range.id}`,
+      label: `${range.start} - ${range.end}`,
+      title: `${range.start} - ${range.end}`,
+      onRemove: () => handleRemoveDateRange(range.id),
+    })),
+    ...excludedSpecificDates.map((dateStr) => ({
+      id: `specific-${dateStr}`,
+      label: new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      title: dateStr,
+      onRemove: () => handleRemoveSpecificDate(dateStr),
+    })),
+  ];
 
   return (
     <div className=" border-b border-gray-200">
@@ -155,6 +204,20 @@ export default function ExcludeFilters({
           </label>
         </div>
 
+        {isExpanded && (
+          <button
+            type="button"
+            onClick={() => {
+              onExcludeToggle(true);
+              setIsExpanded(false);
+              setIsEditMode(true);
+            }}
+            className="text-sm font-medium text-blue-600 hover:text-blue-700 ml-auto"
+          >
+            Edit
+          </button>
+        )}
+
         {excludeEnabled && (
           <>
             <div className="flex items-center gap-2 relative">
@@ -171,7 +234,6 @@ export default function ExcludeFilters({
                 <span>weeks</span>
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               </button>
-
               {activeFilterView === "days" &&
                 excludeFilterTypes.includes("days") && (
                   <div className="absolute w-12 h-[264px] top-full left-7 mt-1 z-20">
@@ -344,103 +406,63 @@ export default function ExcludeFilters({
       </div>
 
       {/* Excluded Items Row */}
-      {(selectedWeekdays.length > 0 ||
-        selectedSavedDates.length > 0 ||
-        excludedDateRanges.length > 0 ||
-        excludedSpecificDates.length > 0) && (
-        <div className="w-full border-t border-gray-200 py-3 px-4">
-          <div className="flex flex-wrap gap-2">
-            {selectedWeekdays.map((day) => {
-              const fullLabel = WEEKDAY_FULL_NAMES[day.value] ?? day.label;
-              return (
+      {allExcludedItems.length > 0 && (
+        <div className="w-full border-t border-gray-200 py-3 px-4 relative">
+          <div className="flex items-center w-full">
+            <div className="flex flex-wrap gap-2 flex-1">
+              {(excludeEnabled
+                ? allExcludedItems
+                : allExcludedItems.slice(0, 4)
+              ).map((item) => (
                 <span
-                  key={day.value}
+                  key={item.id}
                   className="inline-flex items-center h-7 gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
-                  title={fullLabel}
+                  title={item.title}
                 >
-                  {fullLabel}
-                  {excludeEnabled && (
+                  {item.label}
+                  {excludeEnabled && isEditMode && (
                     <button
                       type="button"
-                      onClick={() => onToggleWeekday(day.value)}
+                      onClick={item.onRemove}
                       className="text-gray-400 hover:text-gray-600 transition-colors"
-                      aria-label={`Remove ${fullLabel}`}
+                      aria-label={`Remove ${item.label}`}
                     >
                       <X className="h-2.5 w-2.5" />
                     </button>
                   )}
                 </span>
-              );
-            })}
-
-            {selectedSavedDates.map((saved) => {
-              const chipLabel = getSavedDateChipLabel(saved);
-              const rangeLabel = formatSavedDateRange(saved);
-              return (
-                <span
-                  key={saved.id}
-                  className="inline-flex h-7 items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
-                  title={rangeLabel}
-                >
-                  {chipLabel}
-                  {excludeEnabled && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSavedDate(saved.id)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                      aria-label={`Remove ${chipLabel}`}
-                    >
-                      <X className="h-2.5 w-2.5" />
-                    </button>
-                  )}
-                </span>
-              );
-            })}
-
-            {excludedDateRanges.map((range) => (
-              <span
-                key={range.id}
-                className="inline-flex h-7 items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
-                title={`${range.start} - ${range.end}`}
+              ))}
+            </div>
+            {!excludeEnabled && allExcludedItems.length > 4 && (
+              <button
+                type="button"
+                onClick={() => setIsExpanded(true)}
+                className="text-sm text-[#5F6B7C] hover:text-gray-900 font-normal flex items-center gap-1 ml-auto whitespace-nowrap"
               >
-                {range.start} - {range.end}
-                {excludeEnabled && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveDateRange(range.id)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                    aria-label={`Remove range ${range.start} - ${range.end}`}
-                  >
-                    <X className="h-2.5 w-2.5" />
-                  </button>
-                )}
-              </span>
-            ))}
-
-            {excludedSpecificDates.map((dateStr) => (
-              <span
-                key={dateStr}
-                className="inline-flex h-7 items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
-                title={dateStr}
-              >
-                {new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-                {excludeEnabled && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSpecificDate(dateStr)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                    aria-label={`Remove date ${dateStr}`}
-                  >
-                    <X className="h-2.5 w-2.5" />
-                  </button>
-                )}
-              </span>
-            ))}
+                more <ChevronDown className="w-4 h-4" />
+              </button>
+            )}
           </div>
+
+          {isExpanded &&
+            !excludeEnabled && ( // Only show expanded card if NOT enabled (read-only view)
+              <div
+                ref={cardRef}
+                className="absolute top-0 left-0 w-full min-h-full bg-white border border-gray-200 shadow-lg z-10 p-4 rounded-lg"
+              >
+                <div className="flex flex-wrap gap-2">
+                  {allExcludedItems.map((item) => (
+                    <span
+                      key={item.id}
+                      className="inline-flex items-center h-7 gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
+                      title={item.title}
+                    >
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       )}
     </div>
