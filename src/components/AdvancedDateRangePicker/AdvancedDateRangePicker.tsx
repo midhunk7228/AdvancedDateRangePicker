@@ -96,10 +96,13 @@ export default function AdvancedDateRangePicker({
     handleExcludeSave,
     toggleWeekday,
     setExcludedSavedDates,
+    setExcludedSpecificDates,
+    setExcludedDateRanges,
     setExcludeFilterTypes,
     setActiveFilterView,
     handleMonthSelect,
     handleYearSelect,
+    handleDayClick,
   } = useAdvancedDateRangeState({
     initialSelection,
     onApply,
@@ -179,6 +182,8 @@ export default function AdvancedDateRangePicker({
             activeFilterView={activeFilterView}
             excludedWeekdays={excludedWeekdays}
             excludedSavedDates={excludedSavedDates}
+            excludedSpecificDates={excludedSpecificDates}
+            excludedDateRanges={excludedDateRanges}
             savedDatesSearchTerm={savedDatesSearchTerm}
             filteredSavedDates={filteredSavedDates}
             savedDatesForFilter={savedDatesForFilter}
@@ -190,6 +195,8 @@ export default function AdvancedDateRangePicker({
             onToggleWeekday={toggleWeekday}
             setSavedDatesSearchTerm={setSavedDatesSearchTerm}
             setExcludedSavedDates={setExcludedSavedDates}
+            setExcludedSpecificDates={setExcludedSpecificDates}
+            setExcludedDateRanges={setExcludedDateRanges}
             setExcludeFilterTypes={setExcludeFilterTypes}
             setActiveFilterView={setActiveFilterView}
           />
@@ -218,6 +225,7 @@ export default function AdvancedDateRangePicker({
             onMonthSelect={handleMonthSelect}
             onYearSelect={handleYearSelect}
             todayDateObj={todayDateObj}
+            onDayClick={handleDayClick}
           />
         </div>
 

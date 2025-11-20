@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useMemo } from "react";
-import { ChevronDown, Bookmark, Search, X } from "lucide-react";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { ChevronDown, Bookmark, Search, X, Calendar } from "lucide-react";
 import type { SavedDateRange } from "../../types/dateRange";
 import {
   WEEKDAY_LABELS,
@@ -14,6 +14,8 @@ interface ExcludeFiltersProps {
   activeFilterView: SupportedExcludeFilterType | null;
   excludedWeekdays: number[];
   excludedSavedDates: string[];
+  excludedSpecificDates: string[];
+  excludedDateRanges: Array<{ id: string; start: string; end: string }>;
   savedDatesSearchTerm: string;
   filteredSavedDates: SavedDateRange[];
   savedDatesForFilter: SavedDateRange[];
@@ -25,6 +27,10 @@ interface ExcludeFiltersProps {
   onToggleWeekday: (day: number) => void;
   setSavedDatesSearchTerm: (value: string) => void;
   setExcludedSavedDates: Dispatch<SetStateAction<string[]>>;
+  setExcludedSpecificDates: Dispatch<SetStateAction<string[]>>;
+  setExcludedDateRanges: Dispatch<
+    SetStateAction<Array<{ id: string; start: string; end: string }>>
+  >;
   setExcludeFilterTypes: Dispatch<SetStateAction<SupportedExcludeFilterType[]>>;
   setActiveFilterView: Dispatch<
     SetStateAction<SupportedExcludeFilterType | null>
@@ -37,6 +43,8 @@ export default function ExcludeFilters({
   activeFilterView,
   excludedWeekdays,
   excludedSavedDates,
+  excludedSpecificDates,
+  excludedDateRanges,
   savedDatesSearchTerm,
   filteredSavedDates,
   onExcludeToggle,
@@ -47,10 +55,38 @@ export default function ExcludeFilters({
   onToggleWeekday,
   setSavedDatesSearchTerm,
   setExcludedSavedDates,
+  setExcludedSpecificDates,
+  setExcludedDateRanges,
   setExcludeFilterTypes,
   setActiveFilterView,
   savedDatesForFilter,
 }: ExcludeFiltersProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const editButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      const isClickInsideCard =
+        cardRef.current && cardRef.current.contains(target);
+      const isClickOnEditButton =
+        editButtonRef.current && editButtonRef.current.contains(target);
+
+      if (!isClickInsideCard && !isClickOnEditButton) {
+        setIsExpanded(false);
+      }
+    }
+
+    if (isExpanded) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isExpanded]);
+
   const savedDatesById = useMemo(() => {
     const map = new Map<string, SavedDateRange>();
     for (const saved of savedDatesForFilter) {
@@ -106,11 +142,59 @@ export default function ExcludeFilters({
       return next;
     });
   };
+  const handleRemoveDateRange = (id: string) => {
+    setExcludedDateRanges((prev) => {
+      const next = prev.filter((range) => range.id !== id);
+      if (next.length === 0) {
+        setExcludeFilterTypes((types) =>
+          types.filter((t) => t !== "date-range")
+        );
+      }
+      return next;
+    });
+  };
+
+  const handleRemoveSpecificDate = (dateStr: string) => {
+    setExcludedSpecificDates((current) => {
+      return current.filter((d) => d !== dateStr);
+    });
+  };
+
+  const allExcludedItems = [
+    ...selectedWeekdays.map((day) => ({
+      id: `day-${day.value}`,
+      label: WEEKDAY_FULL_NAMES[day.value] ?? day.label,
+      title: WEEKDAY_FULL_NAMES[day.value] ?? day.label,
+      onRemove: () => onToggleWeekday(day.value),
+    })),
+    ...selectedSavedDates.map((saved) => ({
+      id: `saved-${saved.id}`,
+      label: getSavedDateChipLabel(saved),
+      title: formatSavedDateRange(saved),
+      onRemove: () => handleRemoveSavedDate(saved.id),
+    })),
+    ...excludedDateRanges.map((range) => ({
+      id: `range-${range.id}`,
+      label: `${range.start} - ${range.end}`,
+      title: `${range.start} - ${range.end}`,
+      onRemove: () => handleRemoveDateRange(range.id),
+    })),
+    ...excludedSpecificDates.map((dateStr) => ({
+      id: `specific-${dateStr}`,
+      label: new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      title: dateStr,
+      onRemove: () => handleRemoveSpecificDate(dateStr),
+    })),
+  ];
 
   return (
-    <div className="py-2 border-b border-gray-200">
+    <div className=" border-b border-gray-200">
       {/* Controls Row */}
-      <div className="flex items-center gap-3 px-4">
+      <div className="py-2 flex items-center gap-3 px-4">
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -126,6 +210,21 @@ export default function ExcludeFilters({
             exclude
           </label>
         </div>
+
+        {isExpanded && (
+          <button
+            ref={editButtonRef}
+            type="button"
+            onClick={() => {
+              onExcludeToggle(true);
+              setIsExpanded(false);
+              setIsEditMode(true);
+            }}
+            className="text-sm font-medium text-blue-600 hover:text-blue-700 ml-auto"
+          >
+            Edit
+          </button>
+        )}
 
         {excludeEnabled && (
           <>
@@ -143,11 +242,10 @@ export default function ExcludeFilters({
                 <span>weeks</span>
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               </button>
-
               {activeFilterView === "days" &&
                 excludeFilterTypes.includes("days") && (
-                  <div className="absolute top-full left-0 mt-2 z-20">
-                    <div className="flex flex-col gap-3 px-2 py-2 bg-white border border-gray-200 rounded-xl shadow-xl">
+                  <div className="absolute w-12 h-[264px] top-full left-7 mt-1 z-20">
+                    <div className="flex flex-col gap-3 px-2 py-2 bg-white border border-[0.5px]  border-gray-200 rounded-lg">
                       <div className="flex justify-center">
                         <div className="inline-flex flex-col items-center gap-2 ">
                           {WEEKDAY_LABELS.map((day) => {
@@ -158,7 +256,7 @@ export default function ExcludeFilters({
                               <button
                                 key={day.value}
                                 onClick={() => onToggleWeekday(day.value)}
-                                className={`w-9 h-9 flex items-center justify-center rounded-md text-sm font-semibold transition-colors ${
+                                className={`w-8 h-8 flex items-center justify-center rounded-md text-xs font-semibold transition-colors ${
                                   isSelected
                                     ? "bg-[#CEDBF5] shadow-inner"
                                     : "text-gray-800 hover:bg-gray-100"
@@ -191,9 +289,9 @@ export default function ExcludeFilters({
               {excludeEnabled &&
                 activeFilterView === "saved-dates" &&
                 excludeFilterTypes.includes("saved-dates") && (
-                  <div className="absolute top-full left-0 mt-2 z-20 w-80">
-                    <div className="flex flex-col gap-3 px-3 py-3 bg-white border border-gray-200 rounded-xl shadow-xl">
-                      <div className="relative">
+                  <div className="absolute top-full left-0 mt-2 z-20 w-80 max-h-64">
+                    <div className="flex flex-col gap-3 px-4 py-4 bg-white rounded-xl shadow-xl">
+                      <div className="relative h-7 w-72 flex items-center">
                         <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         <input
                           type="text"
@@ -202,7 +300,7 @@ export default function ExcludeFilters({
                             setSavedDatesSearchTerm(event.target.value)
                           }
                           placeholder="Search saved dates"
-                          className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
 
@@ -211,7 +309,7 @@ export default function ExcludeFilters({
                           No saved dates found
                         </p>
                       ) : (
-                        <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
+                        <div className="max-h-64 overflow-y-auto space-y-2">
                           {filteredSavedDates.map((saved) => {
                             const isExcluded = excludedSavedDates.includes(
                               saved.id
@@ -265,53 +363,31 @@ export default function ExcludeFilters({
                                     return [...current, saved.id];
                                   });
                                 }}
-                                className={`w-full flex items-center justify-between px-3 py-2 rounded-md border text-left transition-colors ${
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors ${
                                   isExcluded
-                                    ? "bg-blue-50 border-blue-300"
-                                    : "bg-white border-gray-200 hover:bg-gray-50"
+                                    ? "bg-[#CEDBF5] "
+                                    : "bg-white  hover:bg-gray-50"
                                 }`}
                               >
                                 <div className="flex flex-col">
-                                  <span className="text-sm font-medium text-gray-900">
+                                  <span className="text-xs font-semibold text-gray-900">
                                     {saved.label}
                                   </span>
-                                  <span className="text-xs text-gray-600">
+                                  <span className="text-[10px] font-medium text-gray-600">
                                     {startDate} - {endDate}
                                   </span>
-                                </div>
-                                <div className="ml-2 flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={isExcluded}
-                                    onChange={() => {}}
-                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 pointer-events-none"
-                                  />
                                 </div>
                               </button>
                             );
                           })}
                         </div>
                       )}
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <Bookmark className="w-4 h-4 text-gray-400" />
-                          <span>{excludedSavedDates.length} selected</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => onRemoveFilterType("saved-dates")}
-                          className="text-xs font-medium text-blue-600 hover:text-blue-700"
-                        >
-                          Clear
-                        </button>
-                      </div>
                     </div>
                   </div>
                 )}
             </div>
 
-            <div className="flex items-center gap-2 ml-auto">
+            <div className="flex items-center gap-2 ml-auto h-7">
               <button
                 type="button"
                 onClick={() => {
@@ -328,7 +404,7 @@ export default function ExcludeFilters({
                   onSave();
                   setActiveFilterView(null);
                 }}
-                className="px-4 py-2 bg-[#003DB8] text-white text-xs font-semibold rounded-md shadow-sm hover:bg-blue-700 transition-colors"
+                className="px-4 h-7 flex items-center py-2 bg-[#003DB8] text-white text-xs font-semibold rounded-md shadow-sm hover:bg-blue-700 transition-colors"
               >
                 Save Exclusion
               </button>
@@ -338,56 +414,63 @@ export default function ExcludeFilters({
       </div>
 
       {/* Excluded Items Row */}
-      {(selectedWeekdays.length > 0 || selectedSavedDates.length > 0) && (
-        <div className="w-full border-t border-gray-200 pt-3 px-4">
-          <div className="flex flex-wrap gap-2">
-            {selectedWeekdays.map((day) => {
-              const fullLabel = WEEKDAY_FULL_NAMES[day.value] ?? day.label;
-              return (
+      {allExcludedItems.length > 0 && (
+        <div className="w-full border-t border-gray-200 py-3 px-4 relative">
+          <div className="flex items-center w-full">
+            <div className="flex flex-wrap gap-2 flex-1">
+              {(excludeEnabled || isExpanded
+                ? allExcludedItems
+                : allExcludedItems.slice(0, 4)
+              ).map((item) => (
                 <span
-                  key={day.value}
-                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700"
-                  title={fullLabel}
+                  key={item.id}
+                  className="inline-flex items-center h-7 gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
+                  title={item.title}
                 >
-                  {fullLabel}
+                  {item.label}
                   {excludeEnabled && (
                     <button
                       type="button"
-                      onClick={() => onToggleWeekday(day.value)}
+                      onClick={item.onRemove}
                       className="text-gray-400 hover:text-gray-600 transition-colors"
-                      aria-label={`Remove ${fullLabel}`}
+                      aria-label={`Remove ${item.label}`}
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-2.5 w-2.5" />
                     </button>
                   )}
                 </span>
-              );
-            })}
-
-            {selectedSavedDates.map((saved) => {
-              const chipLabel = getSavedDateChipLabel(saved);
-              const rangeLabel = formatSavedDateRange(saved);
-              return (
-                <span
-                  key={saved.id}
-                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700"
-                  title={rangeLabel}
-                >
-                  {chipLabel}
-                  {excludeEnabled && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSavedDate(saved.id)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                      aria-label={`Remove ${chipLabel}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </span>
-              );
-            })}
+              ))}
+            </div>
+            {!excludeEnabled && !isExpanded && allExcludedItems.length > 4 && (
+              <button
+                type="button"
+                onClick={() => setIsExpanded(true)}
+                className="text-sm text-[#5F6B7C] hover:text-gray-900 font-normal flex items-center gap-1 ml-auto whitespace-nowrap"
+              >
+                more <ChevronDown className="w-4 h-4" />
+              </button>
+            )}
           </div>
+
+          {isExpanded &&
+            !excludeEnabled && ( // Only show expanded card if NOT enabled (read-only view)
+              <div
+                ref={cardRef}
+                className="absolute top-0 left-0 w-full min-h-full bg-white border border-gray-200 shadow-lg z-10 p-4 rounded-lg"
+              >
+                <div className="flex flex-wrap gap-2">
+                  {allExcludedItems.map((item) => (
+                    <span
+                      key={item.id}
+                      className="inline-flex items-center h-7 gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
+                      title={item.title}
+                    >
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       )}
     </div>

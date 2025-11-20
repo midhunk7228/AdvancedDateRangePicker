@@ -1,4 +1,4 @@
-export type SupportedExcludeFilterType = "days" | "saved-dates";
+export type SupportedExcludeFilterType = "days" | "saved-dates" | "date-range";
 
 export const WEEKDAY_LABELS = [
   { value: 0, label: "Su" },
