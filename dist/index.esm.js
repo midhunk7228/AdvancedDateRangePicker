@@ -2403,7 +2403,6 @@ function gs({
     "div",
     {
       className: `w-44 flex-shrink-0 border-r border-gray-200 flex flex-col overflow-hidden ${o ? "opacity-60" : ""}`,
-      style: { ...r },
       children: [
         /* @__PURE__ */ h("div", { className: "mb-1 mt-4 px-3 flex-shrink-0", children: /* @__PURE__ */ h("div", { className: "flex flex-col", children: Object.values(O).map((u) => {
           const { startDateUtc: g, endDateUtc: x } = u.getValue(), S = n.startDateUtc === g && n.endDateUtc === x;
@@ -2457,7 +2456,7 @@ function gs({
               return /* @__PURE__ */ A(
                 "div",
                 {
-                  className: "group bg-white rounded-md hover:shadow-sm transition-all",
+                  className: "group rounded-md hover:shadow-sm transition-all",
                   children: [
                     /* @__PURE__ */ A("div", { className: "flex items-start justify-between px-1", children: [
                       /* @__PURE__ */ h(
