@@ -173,7 +173,7 @@ export default function PresetSidebar({
       className={`w-44 flex-shrink-0 border-r border-gray-200 flex flex-col overflow-hidden ${
         disabled ? "opacity-60" : ""
       }`}
-      style={{ ...themeColors }}
+      // style={{ ...themeColors }}
     >
       {/* Default Presets */}
       <div className="mb-1 mt-4 px-3 flex-shrink-0">
@@ -265,7 +265,7 @@ export default function PresetSidebar({
                 return (
                   <div
                     key={saved.id}
-                    className="group bg-white rounded-md hover:shadow-sm transition-all"
+                    className="group rounded-md hover:shadow-sm transition-all"
                   >
                     <div className="flex items-start justify-between px-1">
                       <button
