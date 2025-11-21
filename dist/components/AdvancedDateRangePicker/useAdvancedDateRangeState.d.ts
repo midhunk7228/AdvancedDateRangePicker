@@ -21,6 +21,7 @@ interface UseAdvancedDateRangeStateParams {
 export declare function useAdvancedDateRangeState({ initialSelection, onApply, }: UseAdvancedDateRangeStateParams): {
     today: string;
     unit: DateRangeUnit;
+    displayUnit: DateRangeUnit;
     startDateUtc: string;
     endDateUtc: string;
     activeDateField: "start" | "end";
