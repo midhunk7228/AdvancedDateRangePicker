@@ -236,7 +236,7 @@ export default function QuarterPicker({
   return (
     <div className="w-full">
       {/* Two Year Grids with Navigation */}
-      <div className="flex gap-8 justify-between px-6">
+      <div className="flex gap-4 justify-center">
         {renderYear(displayYear, true, false, {
           justifyContent: "start",
           gap: "3rem",
