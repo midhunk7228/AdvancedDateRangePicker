@@ -157,7 +157,7 @@ export default function PresetSidebar({
                     disabled
                       ? "text-gray-400"
                       : isSelected
-                      ? "text-[#cedbf5]"
+                      ? "text-[#0955ed]"
                       : "text-[#1F1F1F]"
                   }`}
                 >
@@ -166,7 +166,7 @@ export default function PresetSidebar({
                 <div
                   className={`text-[10px] leading-relaxed font-medium
  mt-0.5 ${
-   disabled ? "text-gray-400" : isSelected ? "text-[#cedbf5]" : "text-[#61708F]"
+   disabled ? "text-gray-400" : isSelected ? "text-[#0955ed]" : "text-[#61708F]"
  }`}
                 >
                   {formatDateRange(startDateUtc, endDateUtc)}
