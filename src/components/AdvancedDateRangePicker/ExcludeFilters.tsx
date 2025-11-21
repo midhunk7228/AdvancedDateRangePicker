@@ -64,8 +64,10 @@ export default function ExcludeFilters({
 }: ExcludeFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const editButtonRef = useRef<HTMLButtonElement>(null);
+  const chipsContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -192,6 +194,26 @@ export default function ExcludeFilters({
     })),
   ];
 
+  // Detect overflow to show/hide "more" button
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (chipsContainerRef.current && !excludeEnabled && !isExpanded) {
+        const container = chipsContainerRef.current;
+        const isOverflowing = container.scrollWidth > container.clientWidth;
+        setHasOverflow(isOverflowing);
+      } else {
+        setHasOverflow(false);
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener("resize", checkOverflow);
+
+    return () => {
+      window.removeEventListener("resize", checkOverflow);
+    };
+  }, [excludeEnabled, isExpanded, allExcludedItems.length]);
+
   return (
     <div className=" border-b border-gray-200">
       {/* Controls Row */}
@@ -212,7 +234,7 @@ export default function ExcludeFilters({
           </label>
         </div>
 
-        {isExpanded && (
+        {!excludeEnabled && allExcludedItems.length > 0 && (
           <button
             ref={editButtonRef}
             type="button"
@@ -417,36 +439,51 @@ export default function ExcludeFilters({
       {/* Excluded Items Row */}
       {allExcludedItems.length > 0 && (
         <div className="w-full border-t border-gray-200 py-3 px-4 relative">
-          <div className="flex items-center w-full">
-            <div className="flex flex-wrap gap-2 flex-1">
-              {(excludeEnabled || isExpanded
-                ? allExcludedItems
-                : allExcludedItems.slice(0, 4)
-              ).map((item) => (
-                <span
-                  key={item.id}
-                  className="inline-flex items-center h-7 gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
-                  title={item.title}
-                >
-                  {item.label}
-                  {excludeEnabled && (
-                    <button
-                      type="button"
-                      onClick={item.onRemove}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                      aria-label={`Remove ${item.label}`}
-                    >
-                      <X className="h-2.5 w-2.5" />
-                    </button>
-                  )}
-                </span>
-              ))}
+          <div className="flex items-center w-full gap-2">
+            <div className="flex-1 relative">
+              <div
+                ref={chipsContainerRef}
+                className={`flex gap-2 ${
+                  excludeEnabled || isExpanded
+                    ? "flex-wrap"
+                    : "flex-nowrap overflow-hidden"
+                }`}
+              >
+                {allExcludedItems.map((item) => (
+                  <span
+                    key={item.id}
+                    className="inline-flex items-center h-7 gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 flex-shrink-0"
+                    title={item.title}
+                  >
+                    {item.label}
+                    {excludeEnabled && (
+                      <button
+                        type="button"
+                        onClick={item.onRemove}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                        aria-label={`Remove ${item.label}`}
+                      >
+                        <X className="h-2.5 w-2.5" />
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+              {!excludeEnabled && !isExpanded && hasOverflow && (
+                <div
+                  className="absolute right-0 top-0 bottom-0 w-16 pointer-events-none"
+                  style={{
+                    background:
+                      "linear-gradient(to right, transparent, white 70%)",
+                  }}
+                />
+              )}
             </div>
-            {!excludeEnabled && !isExpanded && allExcludedItems.length > 4 && (
+            {!excludeEnabled && !isExpanded && hasOverflow && (
               <button
                 type="button"
                 onClick={() => setIsExpanded(true)}
-                className="text-sm text-[#5F6B7C] hover:text-gray-900 font-normal flex items-center gap-1 ml-auto whitespace-nowrap"
+                className="text-sm text-[#5F6B7C] hover:text-gray-900 font-normal flex items-center gap-1 whitespace-nowrap flex-shrink-0"
               >
                 more <ChevronDown className="w-4 h-4" />
               </button>
