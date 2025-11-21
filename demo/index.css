@@ -262,9 +262,22 @@ body {
   font-size: 14px !important;
   font-weight: 600;
 }
+
+.day-picker-calender .rdp-months .rdp-month:nth-of-type(2) {
+  left: 28px;
+}
 /* .week-picker-calender .rdp-button_previous {
   margin-left: 27px;
 } */
 /* .week-picker-calender .rdp-caption_label {
     margin-left: 27px;
 } */
+
+/* .week-picker-calender .rdp-month:has(.rdp-button_next) .rdp-month_caption */
+
+.day-picker-calender .rdp-button_next {
+  margin-right: 28px !important;
+}
+.day-picker-calender .rdp-month:has(.rdp-button_next) .rdp-month_caption {
+  margin-right: 90px !important;
+}

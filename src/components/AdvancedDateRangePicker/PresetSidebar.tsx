@@ -157,7 +157,7 @@ export default function PresetSidebar({
                     disabled
                       ? "text-gray-400"
                       : isSelected
-                      ? "text-blue-600"
+                      ? "text-[#cedbf5]"
                       : "text-[#1F1F1F]"
                   }`}
                 >
@@ -176,6 +176,9 @@ export default function PresetSidebar({
           })}
         </div>
       </div>
+      <h3 className="text-xs font-semibold border-b bg-[#cedbf5] px-3 pb-3">
+        Saved Dates
+      </h3>
 
       {/* Saved Dates Section */}
       <div className="flex justify-between flex-col flex-1 min-h-0 border-t border-gray-200 px-3 h-full">
