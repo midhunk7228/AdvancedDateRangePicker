@@ -42,6 +42,7 @@ export default function AdvancedDateRangePicker({
 }: AdvancedDateRangePickerProps) {
   const {
     unit,
+    displayUnit,
     startDateUtc,
     endDateUtc,
     activeDateField,
@@ -160,7 +161,7 @@ export default function AdvancedDateRangePicker({
             startDateUtc={startDateUtc}
             endDateUtc={endDateUtc}
             duration={duration}
-            unit={unit}
+            unit={displayUnit}
             excludeEnabled={excludeEnabled}
             activeDateField={activeDateField}
             onStartDateChange={handleStartDateChange}

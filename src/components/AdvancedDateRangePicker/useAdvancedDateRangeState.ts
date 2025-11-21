@@ -7,6 +7,11 @@ import {
   endOfQuarter,
   startOfWeek,
   addDays,
+  addMonths,
+  addQuarters,
+  differenceInDays,
+  differenceInMonths,
+  differenceInQuarters,
   getYear,
   getMonth,
   setMonth,
@@ -162,19 +167,71 @@ export function useAdvancedDateRangeState({
     return Math.floor(currentYear / 10) * 10;
   });
 
+  const effectiveUnit = useMemo(() => {
+    if (!startDateUtc || !endDateUtc) return unit;
+    if (unit === "day") return "day";
+
+    const start = parseUtc(startDateUtc);
+    const end = parseUtc(endDateUtc);
+    // Check exclusive end for diffing to match full unit durations
+    const nextDay = addDays(end, 1);
+
+    const fitsUnit = (checkUnit: DateRangeUnit): boolean => {
+      if (checkUnit === "day") return true;
+      if (checkUnit === "week") {
+        const days = differenceInDays(nextDay, start);
+        return days > 0 && days % 7 === 0;
+      }
+      if (checkUnit === "month") {
+        const months = differenceInMonths(nextDay, start);
+        return (
+          months > 0 && addMonths(start, months).getTime() === nextDay.getTime()
+        );
+      }
+      if (checkUnit === "quarter") {
+        const quarters = differenceInQuarters(nextDay, start);
+        return (
+          quarters > 0 &&
+          addQuarters(start, quarters).getTime() === nextDay.getTime()
+        );
+      }
+      return false;
+    };
+
+    if (unit === "quarter") {
+      if (fitsUnit("quarter")) return "quarter";
+      if (fitsUnit("month")) return "month";
+      if (fitsUnit("week")) return "week";
+      return "day";
+    }
+
+    if (unit === "month") {
+      if (fitsUnit("month")) return "month";
+      if (fitsUnit("week")) return "week";
+      return "day";
+    }
+
+    if (unit === "week") {
+      if (fitsUnit("week")) return "week";
+      return "day";
+    }
+
+    return unit;
+  }, [unit, startDateUtc, endDateUtc]);
+
   useEffect(() => {
     if (startDateUtc && endDateUtc) {
       const newDuration = calcDurationFromRange(
         startDateUtc,
         endDateUtc,
-        unit,
+        effectiveUnit,
         excludedWeekdays
       );
       setDuration(newDuration);
     } else {
       setDuration(1);
     }
-  }, [startDateUtc, endDateUtc, unit, excludedWeekdays]);
+  }, [startDateUtc, endDateUtc, effectiveUnit, excludedWeekdays]);
 
   useEffect(() => {
     const loadSavedDates = async () => {
@@ -401,12 +458,8 @@ export function useAdvancedDateRangeState({
         setExcludedSavedDates([...savedState.excludedSavedDates]);
         setExcludedDateRanges([...savedState.excludedDateRanges]);
 
-        const nextActive = sanitizedTypes.find(
-          (type) => type === "days" || type === "saved-dates"
-        );
-        setActiveFilterView(
-          (nextActive as SupportedExcludeFilterType | null) ?? null
-        );
+        // Do not auto-open any filter view
+        setActiveFilterView(null);
       } else {
         const savedState = excludeSavedStateRef.current;
         const sanitizedTypes = sanitizeExcludeFilterTypes(
@@ -621,7 +674,7 @@ export function useAdvancedDateRangeState({
       if (startDateUtc) {
         const newEndDate = calcEndFromDuration(
           startDateUtc,
-          unit,
+          effectiveUnit,
           value,
           excludedWeekdays
         );
@@ -630,7 +683,7 @@ export function useAdvancedDateRangeState({
       } else if (endDateUtc) {
         const newStartDate = calcStartFromDuration(
           endDateUtc,
-          unit,
+          effectiveUnit,
           value,
           excludedWeekdays
         );
@@ -644,7 +697,7 @@ export function useAdvancedDateRangeState({
       excludeEnabled,
       excludedWeekdays,
       startDateUtc,
-      unit,
+      effectiveUnit,
       updateDisplayedMonth,
     ]
   );
@@ -1113,6 +1166,7 @@ export function useAdvancedDateRangeState({
   return {
     today,
     unit,
+    displayUnit: effectiveUnit,
     startDateUtc,
     endDateUtc,
     activeDateField,

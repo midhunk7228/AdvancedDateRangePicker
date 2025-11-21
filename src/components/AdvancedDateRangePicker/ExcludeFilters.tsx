@@ -7,6 +7,7 @@ import {
   WEEKDAY_FULL_NAMES,
   SupportedExcludeFilterType,
 } from "./constants";
+import { formatDateRangeLabel } from "../../utils/dateRange";
 
 interface ExcludeFiltersProps {
   excludeEnabled: boolean;
@@ -63,8 +64,31 @@ export default function ExcludeFilters({
 }: ExcludeFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const editButtonRef = useRef<HTMLButtonElement>(null);
+  const chipsContainerRef = useRef<HTMLDivElement>(null);
+  const filterControlsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutsideFilter(event: MouseEvent) {
+      if (!activeFilterView) return;
+      const target = event.target as Node;
+      if (
+        filterControlsRef.current &&
+        !filterControlsRef.current.contains(target)
+      ) {
+        setActiveFilterView(null);
+      }
+    }
+
+    if (activeFilterView) {
+      document.addEventListener("mousedown", handleClickOutsideFilter);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideFilter);
+    };
+  }, [activeFilterView, setActiveFilterView]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -175,8 +199,8 @@ export default function ExcludeFilters({
     })),
     ...excludedDateRanges.map((range) => ({
       id: `range-${range.id}`,
-      label: `${range.start} - ${range.end}`,
-      title: `${range.start} - ${range.end}`,
+      label: formatDateRangeLabel(range.start, range.end),
+      title: formatDateRangeLabel(range.start, range.end),
       onRemove: () => handleRemoveDateRange(range.id),
     })),
     ...excludedSpecificDates.map((dateStr) => ({
@@ -191,17 +215,55 @@ export default function ExcludeFilters({
     })),
   ];
 
+  // Detect overflow to show/hide "more" button
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (chipsContainerRef.current && !excludeEnabled && !isExpanded) {
+        const container = chipsContainerRef.current;
+        const isOverflowing = container.scrollWidth > container.clientWidth;
+        setHasOverflow(isOverflowing);
+      } else {
+        setHasOverflow(false);
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener("resize", checkOverflow);
+
+    return () => {
+      window.removeEventListener("resize", checkOverflow);
+    };
+  }, [excludeEnabled, isExpanded, allExcludedItems.length]);
+
   return (
-    <div className=" border-b border-gray-200">
+    <div className=" border-b border-gray-200 ">
       {/* Controls Row */}
-      <div className="py-2 flex items-center gap-3 px-4">
+      <div className="py-2 flex items-center gap-3 px-4 h-[45px]">
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
             id="exclude-checkbox"
-            checked={excludeEnabled}
-            onChange={(e) => onExcludeToggle(e.target.checked)}
-            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            checked={excludeEnabled || allExcludedItems.length > 0}
+            onChange={(e) => {
+              const isChecked = e.target.checked;
+              onExcludeToggle(isChecked);
+              if (
+                !isChecked &&
+                !excludeEnabled &&
+                allExcludedItems.length > 0
+              ) {
+                setExcludedSavedDates([]);
+                setExcludedSpecificDates([]);
+                setExcludedDateRanges([]);
+                setExcludeFilterTypes([]);
+                excludedWeekdays.forEach((day) => onToggleWeekday(day));
+              }
+            }}
+            className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 ${
+              !excludeEnabled && allExcludedItems.length > 0
+                ? "accent-[#61708F]"
+                : "text-blue-600"
+            }`}
           />
           <label
             htmlFor="exclude-checkbox"
@@ -211,7 +273,7 @@ export default function ExcludeFilters({
           </label>
         </div>
 
-        {isExpanded && (
+        {!excludeEnabled && allExcludedItems.length > 0 && (
           <button
             ref={editButtonRef}
             type="button"
@@ -220,7 +282,7 @@ export default function ExcludeFilters({
               setIsExpanded(false);
               setIsEditMode(true);
             }}
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 ml-auto"
+            className="text-sm font-medium text-[#003DB8] ml-auto"
           >
             Edit
           </button>
@@ -228,7 +290,10 @@ export default function ExcludeFilters({
 
         {excludeEnabled && (
           <>
-            <div className="flex items-center gap-2 relative">
+            <div
+              ref={filterControlsRef}
+              className="flex items-center gap-2 relative"
+            >
               <button
                 type="button"
                 onClick={() => onFilterButtonClick("days")}
@@ -404,7 +469,7 @@ export default function ExcludeFilters({
                   onSave();
                   setActiveFilterView(null);
                 }}
-                className="px-4 h-7 flex items-center py-2 bg-[#003DB8] text-white text-xs font-semibold rounded-md shadow-sm hover:bg-blue-700 transition-colors"
+                className="px-4 h-7 flex items-center py-2 bg-[#003DB8] text-white text-xs font-semibold rounded-[4px] shadow-sm hover:bg-blue-700 transition-colors"
               >
                 Save Exclusion
               </button>
@@ -416,36 +481,51 @@ export default function ExcludeFilters({
       {/* Excluded Items Row */}
       {allExcludedItems.length > 0 && (
         <div className="w-full border-t border-gray-200 py-3 px-4 relative">
-          <div className="flex items-center w-full">
-            <div className="flex flex-wrap gap-2 flex-1">
-              {(excludeEnabled || isExpanded
-                ? allExcludedItems
-                : allExcludedItems.slice(0, 4)
-              ).map((item) => (
-                <span
-                  key={item.id}
-                  className="inline-flex items-center h-7 gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
-                  title={item.title}
-                >
-                  {item.label}
-                  {excludeEnabled && (
-                    <button
-                      type="button"
-                      onClick={item.onRemove}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                      aria-label={`Remove ${item.label}`}
-                    >
-                      <X className="h-2.5 w-2.5" />
-                    </button>
-                  )}
-                </span>
-              ))}
+          <div className="flex items-center w-full gap-2">
+            <div className="flex-1 relative">
+              <div
+                ref={chipsContainerRef}
+                className={`flex gap-2 ${
+                  excludeEnabled || isExpanded
+                    ? "flex-wrap"
+                    : "flex-nowrap overflow-hidden"
+                }`}
+              >
+                {allExcludedItems.map((item) => (
+                  <span
+                    key={item.id}
+                    className="inline-flex items-center h-7 gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 flex-shrink-0"
+                    title={item.title}
+                  >
+                    {item.label}
+                    {excludeEnabled && (
+                      <button
+                        type="button"
+                        onClick={item.onRemove}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                        aria-label={`Remove ${item.label}`}
+                      >
+                        <X className="h-2.5 w-2.5" />
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+              {!excludeEnabled && !isExpanded && hasOverflow && (
+                <div
+                  className="absolute right-0 top-0 bottom-0 w-16 pointer-events-none"
+                  style={{
+                    background:
+                      "linear-gradient(to right, transparent, white 70%)",
+                  }}
+                />
+              )}
             </div>
-            {!excludeEnabled && !isExpanded && allExcludedItems.length > 4 && (
+            {!excludeEnabled && !isExpanded && hasOverflow && (
               <button
                 type="button"
                 onClick={() => setIsExpanded(true)}
-                className="text-sm text-[#5F6B7C] hover:text-gray-900 font-normal flex items-center gap-1 ml-auto whitespace-nowrap"
+                className="text-sm text-[#5F6B7C] hover:text-gray-900 font-normal flex items-center gap-1 whitespace-nowrap flex-shrink-0"
               >
                 more <ChevronDown className="w-4 h-4" />
               </button>

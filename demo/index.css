@@ -50,6 +50,19 @@ body {
   background: #dbeafe;
 }
 
+.excluded-disabled
+  .rdp-day_selected.rdp-range_end.rdp-range_start
+  .rdp-day_button {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px 8px 8px 8px;
+  border-right: 4px solid #1e40af;
+  border-left: 4px solid #1e40af;
+}
+.excluded-disabled .rdp-day_selected.rdp-range_end.rdp-range_start {
+  border-radius: 15px 15px 15px 15px;
+}
+
 .rdp-day_selected.rdp-range_start:not(.rdp-range_end) .rdp-day_button {
   background: #2563eb;
   color: white;
@@ -105,8 +118,14 @@ body {
 }
 
 .excluded-enabled td[data-selected="true"].rdp-day_selected.rdp-range_middle,
-.excluded-enabled td[data-selected="true"].rdp-day_selected.rdp-range_start,
-.excluded-enabled td[data-selected="true"].rdp-day_selected.rdp-range_end {
+.excluded-enabled
+  td[data-selected="true"].rdp-day_selected.rdp-range_start:not(
+    .rdp-day_exclude-range-start
+  ):not(.rdp-day_excluded-range),
+.excluded-enabled
+  td[data-selected="true"].rdp-day_selected.rdp-range_end:not(
+    .rdp-day_exclude-range-start
+  ):not(.rdp-day_excluded-range) {
   background-color: #003db8 !important;
   color: white !important;
 }
@@ -162,6 +181,12 @@ body {
 .excluded-enabled
   td[data-selected="true"].rdp-day_selected.rdp-range_start.rdp-day_exclude-range-start,
 .excluded-enabled
+  td[data-selected="true"].rdp-day_selected.rdp-range_start.rdp-day_exclude-range-start
+  .rdp-day_button,
+.excluded-enabled
+  td[data-selected="true"].rdp-day_selected.rdp-range_end.rdp-day_exclude-range-start
+  .rdp-day_button,
+.excluded-enabled
   td[data-selected="true"].rdp-day_selected.rdp-range_end.rdp-day_exclude-range-start,
 .excluded-enabled
   td[data-selected="true"].rdp-day_selected.rdp-range_middle.rdp-day_excluded-range,
@@ -175,6 +200,7 @@ body {
   color: #1f2937 !important;
 }
 
+.excluded-disabled .rdp-day_selected.rdp-day_excluded-range .rdp-day_button,
 .excluded-disabled .rdp-day_selected.rdp-range_middle.rdp-day_excluded-range,
 .excluded-disabled .rdp-day_selected.rdp-range_start.rdp-day_excluded-range,
 .excluded-disabled .rdp-day_selected.rdp-range_end.rdp-day_excluded-range,
@@ -236,9 +262,22 @@ body {
   font-size: 14px !important;
   font-weight: 600;
 }
+
+.day-picker-calender .rdp-months .rdp-month:nth-of-type(2) {
+  left: 28px;
+}
 /* .week-picker-calender .rdp-button_previous {
   margin-left: 27px;
 } */
 /* .week-picker-calender .rdp-caption_label {
     margin-left: 27px;
 } */
+
+/* .week-picker-calender .rdp-month:has(.rdp-button_next) .rdp-month_caption */
+
+.day-picker-calender .rdp-button_next {
+  margin-right: 28px !important;
+}
+.day-picker-calender .rdp-month:has(.rdp-button_next) .rdp-month_caption {
+  margin-right: 90px !important;
+}

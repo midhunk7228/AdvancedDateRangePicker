@@ -39,4 +39,4 @@ export const DEFAULT_PICKER_HEIGHT =
   "var(--adrp-container-height, min(468px, 85vh))";
 
 export const DEFAULT_PICKER_WIDTH =
-  "var(--adrp-container-width, min(696px, 98vw))";
+  "var(--adrp-container-width, min(756px, 98vw))";
