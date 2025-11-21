@@ -458,12 +458,8 @@ export function useAdvancedDateRangeState({
         setExcludedSavedDates([...savedState.excludedSavedDates]);
         setExcludedDateRanges([...savedState.excludedDateRanges]);
 
-        const nextActive = sanitizedTypes.find(
-          (type) => type === "days" || type === "saved-dates"
-        );
-        setActiveFilterView(
-          (nextActive as SupportedExcludeFilterType | null) ?? null
-        );
+        // Do not auto-open any filter view
+        setActiveFilterView(null);
       } else {
         const savedState = excludeSavedStateRef.current;
         const sanitizedTypes = sanitizeExcludeFilterTypes(

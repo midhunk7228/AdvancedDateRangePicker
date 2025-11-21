@@ -68,6 +68,27 @@ export default function ExcludeFilters({
   const cardRef = useRef<HTMLDivElement>(null);
   const editButtonRef = useRef<HTMLButtonElement>(null);
   const chipsContainerRef = useRef<HTMLDivElement>(null);
+  const filterControlsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutsideFilter(event: MouseEvent) {
+      if (!activeFilterView) return;
+      const target = event.target as Node;
+      if (
+        filterControlsRef.current &&
+        !filterControlsRef.current.contains(target)
+      ) {
+        setActiveFilterView(null);
+      }
+    }
+
+    if (activeFilterView) {
+      document.addEventListener("mousedown", handleClickOutsideFilter);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideFilter);
+    };
+  }, [activeFilterView, setActiveFilterView]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -261,7 +282,7 @@ export default function ExcludeFilters({
               setIsExpanded(false);
               setIsEditMode(true);
             }}
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 ml-auto"
+            className="text-sm font-medium text-[#003DB8] ml-auto"
           >
             Edit
           </button>
@@ -269,7 +290,10 @@ export default function ExcludeFilters({
 
         {excludeEnabled && (
           <>
-            <div className="flex items-center gap-2 relative">
+            <div
+              ref={filterControlsRef}
+              className="flex items-center gap-2 relative"
+            >
               <button
                 type="button"
                 onClick={() => onFilterButtonClick("days")}
