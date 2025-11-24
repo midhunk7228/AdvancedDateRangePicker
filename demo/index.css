@@ -275,10 +275,15 @@ body {
 
 /* .week-picker-calender .rdp-month:has(.rdp-button_next) .rdp-month_caption */
 
-.day-picker-calender:not(:has(.day_picker_left_container)) .rdp-button_next {
+.day-picker-calender:not(:has(.day_picker_left_container)):not(
+    :has(.day_with_years_picker_left_container)
+  )
+  .rdp-button_next {
   margin-right: 28px !important;
 }
-.day-picker-calender:not(:has(.day_picker_left_container))
+.day-picker-calender:not(:has(.day_picker_left_container)):not(
+    :has(.day_with_years_picker_left_container)
+  )
   .rdp-month:has(.rdp-button_next)
   .rdp-month_caption {
   margin-right: 90px !important;
