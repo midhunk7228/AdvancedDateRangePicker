@@ -304,22 +304,51 @@ export default function CalendarSection({
     }
 
     return (
-      <div className="flex flex-col w-full">
-        <div className="flex items-center justify-between mb-4">
+      <div
+        className="flex flex-col w-full"
+        style={{ width: "224px", height: "256px" }}
+      >
+        <div className="flex items-center justify-between mb-4 h-[32px]">
           <button
             onClick={() => setYearsViewDecade(yearsViewDecade - 10)}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 rounded-md transition-colors hover:bg-gray-100"
+            type="button"
           >
-            <span className="text-lg">{"<<"}</span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
           </button>
-          <div className="text-lg font-semibold">
+          <div className="text-sm font-semibold text-gray-900">
             {decade}-{decade + 9}
           </div>
           <button
             onClick={() => setYearsViewDecade(yearsViewDecade + 10)}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 rounded-md transition-colors hover:bg-gray-100"
+            type="button"
           >
-            <span className="text-lg">{">>"}</span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
           </button>
         </div>
         <div className="grid grid-cols-3 gap-2 w-full">
@@ -334,17 +363,18 @@ export default function CalendarSection({
                 onClick={() => !isFuture && onYearSelect(year)}
                 disabled={isFuture}
                 className={`
-                  px-3 py-4 border border-gray-300 text-sm font-medium rounded-md transition-colors 
+                  px-3 py-2 text-xs font-medium rounded-md transition-colors flex items-center justify-center
                   ${
                     isFuture
                       ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed"
                       : isOutsideDecade
-                      ? "opacity-50 bg-gray-50 text-gray-500"
+                      ? "opacity-50 text-gray-500"
                       : isSelected
                       ? "bg-[#003DB8] text-white"
                       : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                   }
                 `}
+                type="button"
               >
                 {year}
               </button>
@@ -356,20 +386,49 @@ export default function CalendarSection({
   };
 
   const renderMonthsGrid = (year: number) => (
-    <div className="flex flex-col w-full">
-      <div className="flex items-center justify-between mb-4">
+    <div
+      className="flex flex-col w-full"
+      style={{ width: "224px", height: "256px" }}
+    >
+      <div className="flex items-center justify-between mb-4 h-[32px]">
         <button
           onClick={() => setMonthsViewYear(monthsViewYear - 1)}
-          className="p-1 hover:bg-gray-100 rounded transition-colors"
+          className="p-1 rounded-md transition-colors hover:bg-gray-100"
+          type="button"
         >
-          <span className="text-lg">{"<<"}</span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-4 h-4"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
         </button>
-        <div className="text-lg font-semibold">{year}</div>
+        <div className="text-sm font-semibold text-gray-900">{year}</div>
         <button
           onClick={() => setMonthsViewYear(monthsViewYear + 1)}
-          className="p-1 hover:bg-gray-100 rounded transition-colors"
+          className="p-1 rounded-md transition-colors hover:bg-gray-100"
+          type="button"
         >
-          <span className="text-lg">{">>"}</span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-4 h-4"
+          >
+            <path d="m9 18 6-6-6-6" />
+          </svg>
         </button>
       </div>
       <div className="grid grid-cols-3 gap-2 w-full">
@@ -387,7 +446,7 @@ export default function CalendarSection({
               onClick={() => !isFuture && onMonthSelect(year, index)}
               disabled={isFuture}
               className={`
-                  px-3 py-4 border border-gray-300 text-sm font-medium rounded-md transition-colors
+                  px-3 py-2 text-xs font-medium rounded-md transition-colors flex items-center justify-center
                   ${
                     isFuture
                       ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -396,6 +455,7 @@ export default function CalendarSection({
                       : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                   }
                 `}
+              type="button"
             >
               {month}
             </button>
@@ -480,13 +540,13 @@ export default function CalendarSection({
       } ${unit}-picker-calender`}
     >
       {unit === "day" && (
-        <div className={`flex gap-4`}>
+        <div className={`flex gap-4 `}>
           {yearsViewIndex !== null ? (
             yearsViewIndex === 0 ? (
               <>
                 <div
-                  className="w-full flex-shrink-0"
-                  style={{ minWidth: "280px", maxWidth: "280px" }}
+                  className="w-full flex-shrink-0 justify-items-center"
+                  style={{ minWidth: "288px", maxWidth: "280px" }}
                 >
                   {renderYearsGrid(yearsViewDecade)}
                 </div>
@@ -509,35 +569,47 @@ export default function CalendarSection({
                     numberOfMonths={1}
                     disabled={dayPickerDisabledMatcher}
                     onDayClick={onDayClick}
-                    modifiersClassNames={{
-                      selected: "rdp-day_selected bg-[#003DB8]",
-                      disabled:
-                        "rdp-day_disabled opacity-30 bg-gray-100 text-black",
-                      excludedWeekday: "rdp-day_excluded-weekday",
-                      "excluded-saved-date": "rdp-day_excluded-saved-date",
-                      "excluded-specific-date":
-                        "rdp-day_excluded-specific-date",
-                      "excluded-range": "rdp-day_excluded-range",
-                      "exclude-range-start": "rdp-day_exclude-range-start",
-                    }}
-                    modifiersStyles={{
-                      "excluded-range": {
-                        backgroundColor: "#f3f3f3",
-                        color: "#1f2937",
-                      },
-                      "exclude-range-start": {
-                        backgroundColor: "#f3f3f3",
-                        color: "#1f2937",
-                      },
-                    }}
                     classNames={dayPickerClassNames}
-                    styles={BASE_DAY_PICKER_STYLES}
+                    className="text-xs"
+                    styles={{
+                      ...BASE_DAY_PICKER_STYLES,
+                      month: {
+                        width: "224px",
+                        minWidth: "224px",
+                        maxWidth: "260px",
+                        height: "256px",
+                      },
+                      caption: {
+                        ...BASE_DAY_PICKER_STYLES.caption,
+                        paddingBottom: "8px",
+                      },
+                      month_grid: {
+                        borderCollapse: "separate",
+                        borderSpacing: "0 0.25rem",
+                        width: "100%",
+                      },
+                      table: {
+                        width: "100%",
+                      },
+                      cell: {
+                        padding: "0.10rem 0",
+                        backgroundClip: "content-box",
+                      },
+                      caption_label: {
+                        fontSize: "14px !important",
+                        fontWeight: "600",
+                        lineHeight: "1",
+                      },
+                    }}
                   />
                 </div>
               </>
             ) : (
               <>
-                <div ref={leftCalendarRef}>
+                <div
+                  ref={leftCalendarRef}
+                  className="day_with_years_picker_left_container"
+                >
                   <DayPicker
                     mode="range"
                     navLayout="around"
@@ -556,26 +628,47 @@ export default function CalendarSection({
                       "excluded-saved-date": "rdp-day_excluded-saved-date",
                       "excluded-specific-date":
                         "rdp-day_excluded-specific-date",
-                      "excluded-range": "rdp-day_excluded-range",
-                      "exclude-range-start": "rdp-day_exclude-range-start",
-                    }}
-                    modifiersStyles={{
-                      "excluded-range": {
-                        backgroundColor: "#f3f3f3",
-                        color: "#1f2937",
-                      },
-                      "exclude-range-start": {
-                        backgroundColor: "#f3f3f3",
-                        color: "#1f2937",
-                      },
                     }}
                     classNames={dayPickerClassNames}
-                    styles={BASE_DAY_PICKER_STYLES}
+                    className="text-xs"
+                    styles={{
+                      ...BASE_DAY_PICKER_STYLES,
+                      month: {
+                        width: "224px",
+                        minWidth: "224px",
+                        maxWidth: "260px",
+                        height: "256px",
+                      },
+                      caption: {
+                        ...BASE_DAY_PICKER_STYLES.caption,
+                        paddingBottom: "8px",
+                      },
+                      month_grid: {
+                        borderCollapse: "separate",
+                        borderSpacing: "0 0.25rem",
+                        width: "100%",
+                      },
+                      table: {
+                        width: "100%",
+                      },
+                      cell: {
+                        padding: "0.10rem 0",
+                        backgroundClip: "content-box",
+                      },
+                      caption_label: {
+                        fontSize: "14px !important",
+                        fontWeight: "600",
+                        lineHeight: "1",
+                      },
+                      month_caption: {
+                        height: "32px",
+                      },
+                    }}
                   />
                 </div>
                 <div
-                  className="w-full flex-shrink-0"
-                  style={{ minWidth: "280px", maxWidth: "280px" }}
+                  className="w-full flex-shrink-0 justify-items-center"
+                  style={{ minWidth: "232px", maxWidth: "280px" }}
                 >
                   {renderYearsGrid(yearsViewDecade)}
                 </div>
@@ -660,12 +753,15 @@ export default function CalendarSection({
           ) : monthsViewIndex === 0 ? (
             <>
               <div
-                className="w-full flex-shrink-0"
-                style={{ minWidth: "280px", maxWidth: "280px" }}
+                className="justify-items-center month_picker_left_container"
+                style={{ minWidth: "288px", maxWidth: "280px" }}
               >
                 {renderMonthsGrid(monthsViewYear)}
               </div>
-              <div ref={rightCalendarRef}>
+              <div
+                ref={rightCalendarRef}
+                className="day_picker_right_container"
+              >
                 <DayPicker
                   mode="range"
                   navLayout="around"
@@ -692,13 +788,43 @@ export default function CalendarSection({
                     "excluded-specific-date": "rdp-day_excluded-specific-date",
                   }}
                   classNames={dayPickerClassNames}
-                  styles={BASE_DAY_PICKER_STYLES}
+                  className="text-xs"
+                  styles={{
+                    ...BASE_DAY_PICKER_STYLES,
+                    month: {
+                      width: "224px",
+                      minWidth: "224px",
+                      maxWidth: "260px",
+                      height: "256px",
+                    },
+                    caption: {
+                      ...BASE_DAY_PICKER_STYLES.caption,
+                      paddingBottom: "8px",
+                    },
+                    month_grid: {
+                      borderCollapse: "separate",
+                      borderSpacing: "0 0.25rem",
+                      width: "100%",
+                    },
+                    table: {
+                      width: "100%",
+                    },
+                    cell: {
+                      padding: "0.10rem 0",
+                      backgroundClip: "content-box",
+                    },
+                    caption_label: {
+                      fontSize: "14px !important",
+                      fontWeight: "600",
+                      lineHeight: "1",
+                    },
+                  }}
                 />
               </div>
             </>
           ) : (
             <>
-              <div ref={leftCalendarRef}>
+              <div ref={leftCalendarRef} className="day_picker_left_container">
                 <DayPicker
                   mode="range"
                   navLayout="around"
@@ -717,15 +843,46 @@ export default function CalendarSection({
                     "excluded-saved-date": "rdp-day_excluded-saved-date",
                     "excluded-specific-date": "rdp-day_excluded-specific-date",
                   }}
-                  classNames={{
-                    chevron: "fill-black",
+                  classNames={dayPickerClassNames}
+                  className="text-xs"
+                  styles={{
+                    ...BASE_DAY_PICKER_STYLES,
+                    month: {
+                      width: "224px",
+                      minWidth: "224px",
+                      maxWidth: "260px",
+                      height: "256px",
+                    },
+                    caption: {
+                      ...BASE_DAY_PICKER_STYLES.caption,
+                      paddingBottom: "8px",
+                    },
+                    month_grid: {
+                      borderCollapse: "separate",
+                      borderSpacing: "0 0.25rem",
+                      width: "100%",
+                    },
+                    table: {
+                      width: "100%",
+                    },
+                    cell: {
+                      padding: "0.10rem 0",
+                      backgroundClip: "content-box",
+                    },
+                    caption_label: {
+                      fontSize: "14px !important",
+                      fontWeight: "600",
+                      lineHeight: "1",
+                    },
+                    month_caption: {
+                      height: "32px",
+                    },
                   }}
-                  styles={BASE_DAY_PICKER_STYLES}
                 />
               </div>
               <div
-                className="w-full flex-shrink-0"
-                style={{ minWidth: "280px", maxWidth: "280px" }}
+                className="justify-items-center month_picker_right_container"
+                style={{ minWidth: "232px", maxWidth: "280px" }}
               >
                 {renderMonthsGrid(monthsViewYear)}
               </div>
