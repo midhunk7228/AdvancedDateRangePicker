@@ -26,6 +26,10 @@ interface DateInputsRowProps {
   onEndDateChange: (value: string) => void;
   onDurationChange: (value: number) => void;
   onActiveFieldChange: (field: "start" | "end") => void;
+  endFieldError: boolean;
+  setEndFieldError: (hasError: boolean) => void;
+  startFieldError: boolean;
+  setStartFieldError: (hasError: boolean) => void;
 }
 
 export default function DateInputsRow({
@@ -39,6 +43,10 @@ export default function DateInputsRow({
   onEndDateChange,
   onDurationChange,
   onActiveFieldChange,
+  endFieldError,
+  setEndFieldError,
+  startFieldError,
+  setStartFieldError,
 }: DateInputsRowProps) {
   const durationInputRef = useRef<HTMLInputElement>(null);
   const [unitPosition, setUnitPosition] = useState(0);
@@ -48,9 +56,6 @@ export default function DateInputsRow({
   const [endFieldValue, setEndFieldValue] = useState<Dayjs | null>(() =>
     parseDateValue(endDateUtc)
   );
-  const [startFieldError, setStartFieldError] = useState<boolean>(false);
-  const [endFieldError, setEndFieldError] = useState<boolean>(false);
-
   useEffect(() => {
     if (durationInputRef.current) {
       const canvas = document.createElement("canvas");

@@ -167,6 +167,9 @@ export function useAdvancedDateRangeState({
     return Math.floor(currentYear / 10) * 10;
   });
 
+  const [endFieldError, setEndFieldError] = useState<boolean>(false);
+  const [startFieldError, setStartFieldError] = useState<boolean>(false);
+
   const effectiveUnit = useMemo(() => {
     if (!startDateUtc || !endDateUtc) return unit;
     if (unit === "day") return "day";
@@ -1231,5 +1234,9 @@ export function useAdvancedDateRangeState({
     handleYearSelect,
     handleDayClick,
     excludeSelectionStart,
+    endFieldError,
+    setEndFieldError,
+    startFieldError,
+    setStartFieldError,
   };
 }

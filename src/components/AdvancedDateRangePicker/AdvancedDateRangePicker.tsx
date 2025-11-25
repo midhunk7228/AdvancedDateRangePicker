@@ -104,6 +104,10 @@ export default function AdvancedDateRangePicker({
     handleMonthSelect,
     handleYearSelect,
     handleDayClick,
+    endFieldError,
+    setEndFieldError,
+    startFieldError,
+    setStartFieldError,
   } = useAdvancedDateRangeState({
     initialSelection,
     onApply,
@@ -168,6 +172,10 @@ export default function AdvancedDateRangePicker({
             onEndDateChange={handleEndDateChange}
             onDurationChange={handleDurationChange}
             onActiveFieldChange={setActiveDateField}
+            endFieldError={endFieldError}
+            setEndFieldError={setEndFieldError}
+            startFieldError={startFieldError}
+            setStartFieldError={setStartFieldError}
           />
 
           {hasFutureDates && futureWarning && (
@@ -227,6 +235,8 @@ export default function AdvancedDateRangePicker({
             onYearSelect={handleYearSelect}
             todayDateObj={todayDateObj}
             onDayClick={handleDayClick}
+            endFieldError={endFieldError}
+            startFieldError={startFieldError}
           />
         </div>
 
