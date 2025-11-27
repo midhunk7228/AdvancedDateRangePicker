@@ -4,6 +4,7 @@ interface DateInputsRowProps {
     endDateUtc: string;
     duration: number;
     unit: DateRangeUnit;
+    selectedUnit?: DateRangeUnit;
     excludeEnabled: boolean;
     activeDateField: "start" | "end";
     onStartDateChange: (value: string) => void;
@@ -15,6 +16,6 @@ interface DateInputsRowProps {
     startFieldError: boolean;
     setStartFieldError: (hasError: boolean) => void;
 }
-export default function DateInputsRow({ startDateUtc, endDateUtc, duration, unit, excludeEnabled, activeDateField, onStartDateChange, onEndDateChange, onDurationChange, onActiveFieldChange, endFieldError, setEndFieldError, startFieldError, setStartFieldError, }: DateInputsRowProps): import("react/jsx-runtime").JSX.Element;
+export default function DateInputsRow({ startDateUtc, endDateUtc, duration, unit, selectedUnit, excludeEnabled, activeDateField, onStartDateChange, onEndDateChange, onDurationChange, onActiveFieldChange, endFieldError, setEndFieldError, startFieldError, setStartFieldError, }: DateInputsRowProps): import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=DateInputsRow.d.ts.map
