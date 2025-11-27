@@ -126,6 +126,30 @@ export function useAdvancedDateRangeState({
     );
   });
 
+  const exclusionBasisRangeRef = useRef<{ start: string; end: string } | null>(
+    (() => {
+      const hasSpecificExclusions =
+        (initialSelection?.excludedSavedDates &&
+          initialSelection.excludedSavedDates.length > 0) ||
+        (initialSelection?.excludedDateRanges &&
+          initialSelection.excludedDateRanges.length > 0) ||
+        (initialSelection?.excludedSpecificDates &&
+          initialSelection.excludedSpecificDates.length > 0);
+
+      if (
+        hasSpecificExclusions &&
+        initialSelection?.startDateUtc &&
+        initialSelection?.endDateUtc
+      ) {
+        return {
+          start: initialSelection.startDateUtc,
+          end: initialSelection.endDateUtc,
+        };
+      }
+      return null;
+    })()
+  );
+
   const excludeSavedStateRef = useRef<ExcludeSavedState>({
     excludeFilterTypes: initialSupportedExcludeFilterTypes,
     excludedWeekdays: initialSelection?.excludedWeekdays || [],
@@ -166,6 +190,9 @@ export function useAdvancedDateRangeState({
     const currentYear = getYear(parseUtc(today));
     return Math.floor(currentYear / 10) * 10;
   });
+
+  const [endFieldError, setEndFieldError] = useState<boolean>(false);
+  const [startFieldError, setStartFieldError] = useState<boolean>(false);
 
   const effectiveUnit = useMemo(() => {
     if (!startDateUtc || !endDateUtc) return unit;
@@ -232,6 +259,56 @@ export function useAdvancedDateRangeState({
       setDuration(1);
     }
   }, [startDateUtc, endDateUtc, effectiveUnit, excludedWeekdays]);
+
+  useEffect(() => {
+    if (excludeEnabled) return;
+    if (!startDateUtc || !endDateUtc) return;
+    if (!exclusionBasisRangeRef.current) return;
+
+    const hasSpecificExclusions =
+      excludedSavedDates.length > 0 ||
+      excludedSpecificDates.length > 0 ||
+      excludedDateRanges.length > 0;
+
+    if (!hasSpecificExclusions) {
+      return;
+    }
+
+    const basis = exclusionBasisRangeRef.current;
+    const isDisjoint = startDateUtc > basis.end || endDateUtc < basis.start;
+
+    if (isDisjoint) {
+      setExcludedSavedDates([]);
+      setExcludedSpecificDates([]);
+      setExcludedDateRanges([]);
+
+      setExcludeFilterTypes((prev) => prev.filter((t) => t === "days"));
+
+      if (excludeSavedStateRef.current) {
+        excludeSavedStateRef.current = {
+          ...excludeSavedStateRef.current,
+          excludedSavedDates: [],
+          excludedSpecificDates: [],
+          excludedDateRanges: [],
+          excludeFilterTypes:
+            excludeSavedStateRef.current.excludeFilterTypes.filter(
+              (t) => t === "days"
+            ),
+        };
+      }
+
+      exclusionBasisRangeRef.current = null;
+      setExcludeApplied(excludedWeekdays.length > 0);
+    }
+  }, [
+    startDateUtc,
+    endDateUtc,
+    excludeEnabled,
+    excludedSavedDates,
+    excludedSpecificDates,
+    excludedDateRanges,
+    excludedWeekdays,
+  ]);
 
   useEffect(() => {
     const loadSavedDates = async () => {
@@ -580,6 +657,10 @@ export function useAdvancedDateRangeState({
       excludedDateRanges: nextDateRanges,
     };
 
+    if (startDateUtc && endDateUtc) {
+      exclusionBasisRangeRef.current = { start: startDateUtc, end: endDateUtc };
+    }
+
     // We only set SupportedExcludeFilterType to state because 'specific-date' is legacy/internal
     // and doesn't have a filter button.
     const supportedTypes = sanitizeExcludeFilterTypes(nextTypes);
@@ -599,6 +680,8 @@ export function useAdvancedDateRangeState({
     excludedWeekdays,
     excludedSpecificDates,
     sanitizeExcludeFilterTypes,
+    startDateUtc,
+    endDateUtc,
   ]);
 
   const toggleWeekday = useCallback(
@@ -672,9 +755,32 @@ export function useAdvancedDateRangeState({
       setDuration(value);
 
       if (startDateUtc) {
+        // Snap start date to the start of the unit if necessary
+        let effectiveStartUtc = startDateUtc;
+        if (unit === "week" || unit === "month" || unit === "quarter") {
+          const currentStart = parseUtc(startDateUtc);
+          let newStart = currentStart;
+
+          if (unit === "week") {
+            newStart = startOfWeek(currentStart, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+          } else if (unit === "month") {
+            newStart = startOfMonth(currentStart);
+          } else if (unit === "quarter") {
+            newStart = startOfQuarter(currentStart);
+          }
+
+          const newStartStr = formatUtc(newStart);
+          if (newStartStr !== startDateUtc) {
+            setStartDateUtc(newStartStr);
+            effectiveStartUtc = newStartStr;
+          }
+        }
+
         const newEndDate = calcEndFromDuration(
-          startDateUtc,
-          effectiveUnit,
+          effectiveStartUtc,
+          unit,
           value,
           excludedWeekdays
         );
@@ -683,7 +789,7 @@ export function useAdvancedDateRangeState({
       } else if (endDateUtc) {
         const newStartDate = calcStartFromDuration(
           endDateUtc,
-          effectiveUnit,
+          unit,
           value,
           excludedWeekdays
         );
@@ -697,7 +803,7 @@ export function useAdvancedDateRangeState({
       excludeEnabled,
       excludedWeekdays,
       startDateUtc,
-      effectiveUnit,
+      unit,
       updateDisplayedMonth,
     ]
   );
@@ -749,6 +855,13 @@ export function useAdvancedDateRangeState({
       setExcludedSpecificDates(restoredSpecificDates);
       setExcludedSavedDates(restoredSavedDates);
       setExcludedDateRanges(restoredDateRanges);
+
+      if (selection.startDateUtc && selection.endDateUtc) {
+        exclusionBasisRangeRef.current = {
+          start: selection.startDateUtc,
+          end: selection.endDateUtc,
+        };
+      }
 
       excludeSavedStateRef.current = {
         excludeFilterTypes: restoredTypes,
@@ -1231,5 +1344,9 @@ export function useAdvancedDateRangeState({
     handleYearSelect,
     handleDayClick,
     excludeSelectionStart,
+    endFieldError,
+    setEndFieldError,
+    startFieldError,
+    setStartFieldError,
   };
 }

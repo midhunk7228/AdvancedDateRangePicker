@@ -106,6 +106,10 @@ export declare function useAdvancedDateRangeState({ initialSelection, onApply, }
     handleYearSelect: (year: number) => void;
     handleDayClick: (date: Date) => void;
     excludeSelectionStart: string | null;
+    endFieldError: boolean;
+    setEndFieldError: import('react').Dispatch<import('react').SetStateAction<boolean>>;
+    startFieldError: boolean;
+    setStartFieldError: import('react').Dispatch<import('react').SetStateAction<boolean>>;
 };
 export {};
 //# sourceMappingURL=useAdvancedDateRangeState.d.ts.map

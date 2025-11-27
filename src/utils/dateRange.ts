@@ -119,7 +119,15 @@ export function calcEndFromDuration(
 
     return formatUtc(currentDate);
   } else {
-    // For other units or no exclusions, simple addition
+    // For other units or no exclusions, calculate end date based on unit span
+    // If unit is week/month/quarter, duration 1 means "1 full week/month/quarter"
+    // So we add the unit amount, then subtract 1 day to get the inclusive end date
+    if (unit === "week" || unit === "month" || unit === "quarter") {
+      const nextDate = addUnitUtc(startDateUtc, unit, duration);
+      return formatUtc(addDays(parseUtc(nextDate), -1));
+    }
+    
+    // Fallback for other cases (though primarily handled above)
     return addUnitUtc(startDateUtc, unit, duration - 1);
   }
 }
@@ -156,7 +164,15 @@ export function calcStartFromDuration(
 
     return formatUtc(currentDate);
   } else {
-    // For other units or no exclusions, subtract duration - 1
+    // For other units or no exclusions, subtract duration
+    // Similar to calcEndFromDuration, we calculate start date based on unit span
+    if (unit === "week" || unit === "month" || unit === "quarter") {
+      // Get the date 'duration' units ago
+      const prevDate = addUnitUtc(endDateUtc, unit, -duration);
+      // Add 1 day to get the inclusive start date
+      return formatUtc(addDays(parseUtc(prevDate), 1));
+    }
+
     const date = parseUtc(endDateUtc);
     let result: Date;
 
@@ -164,17 +180,10 @@ export function calcStartFromDuration(
       case "day":
         result = addDays(date, -(duration - 1));
         break;
-      case "week":
-        result = addWeeks(date, -(duration - 1));
-        break;
-      case "month":
-        result = addMonths(date, -(duration - 1));
-        break;
-      case "quarter":
-        result = addQuarters(date, -(duration - 1));
-        break;
       default:
-        result = date;
+        // This default block shouldn't be reached for week/month/quarter due to if check above
+        // But keeping safe fallback for day
+        result = addDays(date, -(duration - 1));
     }
 
     return formatUtc(result);

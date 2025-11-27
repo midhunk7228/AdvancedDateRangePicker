@@ -55,6 +55,8 @@ interface CalendarSectionProps {
   onYearSelect: (year: number) => void;
   todayDateObj: Date;
   onDayClick: (date: Date) => void;
+  endFieldError: boolean;
+  startFieldError: boolean;
 }
 
 export default function CalendarSection({
@@ -83,6 +85,8 @@ export default function CalendarSection({
   onYearSelect,
   todayDateObj,
   onDayClick,
+  endFieldError,
+  startFieldError,
 }: CalendarSectionProps) {
   const leftCalendarRef = useRef<HTMLDivElement>(null);
   const rightCalendarRef = useRef<HTMLDivElement>(null);
@@ -683,7 +687,9 @@ export default function CalendarSection({
               <DayPicker
                 mode="range"
                 navLayout="around"
-                selected={selectedRange}
+                selected={
+                  endFieldError || startFieldError ? undefined : selectedRange
+                }
                 onSelect={(range, _dayPickerProps) => {
                   handleResetCalendarSelect(range, _dayPickerProps);
                 }}
@@ -1000,6 +1006,8 @@ export default function CalendarSection({
         <QuarterPicker
           selectedRange={monthQuarterRange}
           onSelect={handleCalendarSelect}
+          activeDateField={activeDateField}
+          onActiveFieldChange={setActiveDateField}
           disabled={excludeEnabled}
         />
       )}
