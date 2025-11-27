@@ -166,6 +166,7 @@ export default function AdvancedDateRangePicker({
             endDateUtc={endDateUtc}
             duration={duration}
             unit={displayUnit}
+            selectedUnit={unit}
             excludeEnabled={excludeEnabled}
             activeDateField={activeDateField}
             onStartDateChange={handleStartDateChange}

@@ -755,9 +755,32 @@ export function useAdvancedDateRangeState({
       setDuration(value);
 
       if (startDateUtc) {
+        // Snap start date to the start of the unit if necessary
+        let effectiveStartUtc = startDateUtc;
+        if (unit === "week" || unit === "month" || unit === "quarter") {
+          const currentStart = parseUtc(startDateUtc);
+          let newStart = currentStart;
+
+          if (unit === "week") {
+            newStart = startOfWeek(currentStart, {
+              weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+            });
+          } else if (unit === "month") {
+            newStart = startOfMonth(currentStart);
+          } else if (unit === "quarter") {
+            newStart = startOfQuarter(currentStart);
+          }
+
+          const newStartStr = formatUtc(newStart);
+          if (newStartStr !== startDateUtc) {
+            setStartDateUtc(newStartStr);
+            effectiveStartUtc = newStartStr;
+          }
+        }
+
         const newEndDate = calcEndFromDuration(
-          startDateUtc,
-          effectiveUnit,
+          effectiveStartUtc,
+          unit,
           value,
           excludedWeekdays
         );
@@ -766,7 +789,7 @@ export function useAdvancedDateRangeState({
       } else if (endDateUtc) {
         const newStartDate = calcStartFromDuration(
           endDateUtc,
-          effectiveUnit,
+          unit,
           value,
           excludedWeekdays
         );
@@ -780,7 +803,7 @@ export function useAdvancedDateRangeState({
       excludeEnabled,
       excludedWeekdays,
       startDateUtc,
-      effectiveUnit,
+      unit,
       updateDisplayedMonth,
     ]
   );
