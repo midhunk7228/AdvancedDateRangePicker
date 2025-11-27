@@ -1006,6 +1006,8 @@ export default function CalendarSection({
         <QuarterPicker
           selectedRange={monthQuarterRange}
           onSelect={handleCalendarSelect}
+          activeDateField={activeDateField}
+          onActiveFieldChange={setActiveDateField}
           disabled={excludeEnabled}
         />
       )}
