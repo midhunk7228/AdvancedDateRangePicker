@@ -2347,8 +2347,8 @@ function ws({
   }, []);
   const _ = ys(), I = (p) => {
     if (o) return;
-    const { startDateUtc: l, endDateUtc: v } = p();
-    e(l, v);
+    const { startDateUtc: l, endDateUtc: b } = p();
+    e(l, b);
   }, P = async () => {
     if (o) return;
     if (c.trim() === "") {
@@ -2364,18 +2364,18 @@ function ws({
     i(l), await gt.saveData(tn, l), m(""), d(!1);
   }, W = async (p) => {
     if (o) return;
-    const l = a.filter((v) => v.id !== p);
+    const l = a.filter((b) => b.id !== p);
     i(l), await gt.saveData(tn, l);
   }, O = (p) => {
     o || (t ? t(p.selection) : e(p.selection.startDateUtc, p.selection.endDateUtc));
   }, B = (p, l) => {
-    const v = (T) => (/* @__PURE__ */ new Date(T + "T00:00:00")).toLocaleDateString("en-US", {
+    const b = (T) => (/* @__PURE__ */ new Date(T + "T00:00:00")).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric"
     });
-    return p === l ? v(p) : `${v(p)} - ${v(l)}`;
-  }, w = (p) => {
+    return p === l ? b(p) : `${b(p)} - ${b(l)}`;
+  }, v = (p) => {
     if (n.startDateUtc !== p.startDateUtc || n.endDateUtc !== p.endDateUtc)
       return !1;
     const l = (E = [], C = []) => {
@@ -2394,9 +2394,9 @@ function ws({
       p.excludedSavedDates
     ))
       return !1;
-    const v = n.excludedDateRanges || [], T = p.excludedDateRanges || [];
-    if (v.length !== T.length) return !1;
-    const Y = (E) => `${E.start}|${E.end}`, q = new Set(v.map(Y));
+    const b = n.excludedDateRanges || [], T = p.excludedDateRanges || [];
+    if (b.length !== T.length) return !1;
+    const Y = (E) => `${E.start}|${E.end}`, q = new Set(b.map(Y));
     return T.every((E) => q.has(Y(E)));
   };
   return /* @__PURE__ */ H(
@@ -2405,7 +2405,7 @@ function ws({
       className: `w-44 flex-shrink-0 border-r border-gray-200 flex flex-col overflow-hidden ${o ? "opacity-60" : ""}`,
       children: [
         /* @__PURE__ */ h("div", { className: "mb-1 mt-4 px-3 flex-shrink-0", children: /* @__PURE__ */ h("div", { className: "flex flex-col", children: Object.values(_).map((p) => {
-          const { startDateUtc: l, endDateUtc: v } = p.getValue(), T = n.startDateUtc === l && n.endDateUtc === v;
+          const { startDateUtc: l, endDateUtc: b } = p.getValue(), T = n.startDateUtc === l && n.endDateUtc === b;
           return /* @__PURE__ */ H(
             "button",
             {
@@ -2426,7 +2426,7 @@ function ws({
                   {
                     className: `text-[10px] leading-relaxed font-medium
  mt-0.5 ${o ? "text-gray-400" : T ? "text-[#0955ed]" : "text-[#61708F]"}`,
-                    children: B(l, v)
+                    children: B(l, b)
                   }
                 )
               ]
@@ -2451,50 +2451,52 @@ function ws({
               )
             ] }),
             f && /* @__PURE__ */ h("div", { className: "mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 flex-shrink-0", children: "Save your frequently used date ranges for quick access later." }),
-            a.length === 0 ? /* @__PURE__ */ h("p", { className: "text-xs text-gray-500 mb-3 italic flex-shrink-0", children: "No saved dates yet" }) : /* @__PURE__ */ h("div", { className: "space-y-3 mb-3 overflow-y-auto flex-1 min-h-0", children: a.map((p) => {
-              const l = w(p.selection);
-              return /* @__PURE__ */ H(
+            a.length === 0 ? /* @__PURE__ */ h("p", { className: "text-xs text-gray-500 mb-3 italic flex-shrink-0", children: "No saved dates yet" }) : /* @__PURE__ */ h("div", { className: "space-y-3 mb-3 overflow-y-auto flex-1 min-h-0 max-h-[220px]", children: a.map((p) => {
+              const l = v(p.selection);
+              return /* @__PURE__ */ h(
                 "div",
                 {
-                  className: "group rounded-md hover:shadow-sm transition-all",
-                  children: [
-                    /* @__PURE__ */ H("div", { className: "flex items-start justify-between px-1", children: [
-                      /* @__PURE__ */ h(
-                        "button",
-                        {
-                          onClick: () => O(p),
-                          disabled: o,
-                          className: `flex-1 text-left ${o ? "cursor-not-allowed opacity-60" : ""}`,
-                          children: /* @__PURE__ */ h(
+                  className: `group rounded-lg transition-all border ${l ? "bg-blue-50 border-blue-200 shadow-sm" : "bg-white border-gray-100 hover:border-gray-300 hover:shadow-sm"}`,
+                  children: /* @__PURE__ */ H("div", { className: "flex items-start justify-between p-2.5", children: [
+                    /* @__PURE__ */ H(
+                      "button",
+                      {
+                        onClick: () => O(p),
+                        disabled: o,
+                        className: `flex-1 text-left ${o ? "cursor-not-allowed opacity-60" : ""}`,
+                        children: [
+                          /* @__PURE__ */ h(
                             "div",
                             {
-                              className: `text-xs font-semibold mb-1 ${o ? "text-gray-400" : l ? "text-[#0955ed]" : "text-gray-900"}`,
+                              className: `text-xs font-semibold mb-1 ${o ? "text-gray-400" : l ? "text-blue-700" : "text-gray-900"}`,
                               children: p.label
                             }
+                          ),
+                          /* @__PURE__ */ h(
+                            "div",
+                            {
+                              className: `text-[10px] leading-relaxed font-medium ${o ? "text-gray-400" : l ? "text-blue-600" : "text-gray-500"}`,
+                              children: B(
+                                p.selection.startDateUtc,
+                                p.selection.endDateUtc
+                              )
+                            }
                           )
-                        }
-                      ),
-                      /* @__PURE__ */ h(
-                        "button",
-                        {
-                          onClick: () => W(p.id),
-                          disabled: o,
-                          className: `${o ? "opacity-40 cursor-not-allowed" : "opacity-0 group-hover:opacity-100"} text-red-500 hover:text-red-700 transition-opacity ml-2`,
-                          children: /* @__PURE__ */ h(io, { className: "w-3.5 h-3.5" })
-                        }
-                      )
-                    ] }),
+                        ]
+                      }
+                    ),
                     /* @__PURE__ */ h(
-                      "div",
+                      "button",
                       {
-                        className: `text-[10px] leading-relaxed font-medium px-1 ${o ? "text-gray-400" : l ? "text-[#0955ed]" : "text-[#61708F]"}`,
-                        children: B(
-                          p.selection.startDateUtc,
-                          p.selection.endDateUtc
-                        )
+                        onClick: (b) => {
+                          b.stopPropagation(), W(p.id);
+                        },
+                        disabled: o,
+                        className: `${o ? "opacity-40 cursor-not-allowed" : "opacity-0 group-hover:opacity-100"} p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-md transition-all ml-1 -mr-1`,
+                        children: /* @__PURE__ */ h(io, { className: "w-3.5 h-3.5" })
                       }
                     )
-                  ]
+                  ] })
                 },
                 p.id
               );
@@ -2621,39 +2623,39 @@ function Ms() {
       var n = 1e3, r = 6e4, o = 36e5, a = "millisecond", i = "second", s = "minute", d = "hour", c = "day", m = "week", f = "month", D = "quarter", _ = "year", I = "date", P = "Invalid Date", W = /^(\d{4})[-/]?(\d{1,2})?[-/]?(\d{0,2})[Tt\s]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/, O = /\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g, B = { name: "en", weekdays: "Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"), months: "January_February_March_April_May_June_July_August_September_October_November_December".split("_"), ordinal: function(N) {
         var g = ["th", "st", "nd", "rd"], k = N % 100;
         return "[" + N + (g[(k - 20) % 10] || g[k] || g[0]) + "]";
-      } }, w = function(N, g, k) {
+      } }, v = function(N, g, k) {
         var S = String(N);
         return !S || S.length >= g ? N : "" + Array(g + 1 - S.length).join(k) + N;
-      }, p = { s: w, z: function(N) {
-        var g = -N.utcOffset(), k = Math.abs(g), S = Math.floor(k / 60), b = k % 60;
-        return (g <= 0 ? "+" : "-") + w(S, 2, "0") + ":" + w(b, 2, "0");
+      }, p = { s: v, z: function(N) {
+        var g = -N.utcOffset(), k = Math.abs(g), S = Math.floor(k / 60), w = k % 60;
+        return (g <= 0 ? "+" : "-") + v(S, 2, "0") + ":" + v(w, 2, "0");
       }, m: function N(g, k) {
         if (g.date() < k.date()) return -N(k, g);
-        var S = 12 * (k.year() - g.year()) + (k.month() - g.month()), b = g.clone().add(S, f), $ = k - b < 0, M = g.clone().add(S + ($ ? -1 : 1), f);
-        return +(-(S + (k - b) / ($ ? b - M : M - b)) || 0);
+        var S = 12 * (k.year() - g.year()) + (k.month() - g.month()), w = g.clone().add(S, f), $ = k - w < 0, M = g.clone().add(S + ($ ? -1 : 1), f);
+        return +(-(S + (k - w) / ($ ? w - M : M - w)) || 0);
       }, a: function(N) {
         return N < 0 ? Math.ceil(N) || 0 : Math.floor(N);
       }, p: function(N) {
         return { M: f, y: _, w: m, d: c, D: I, h: d, m: s, s: i, ms: a, Q: D }[N] || String(N || "").toLowerCase().replace(/s$/, "");
       }, u: function(N) {
         return N === void 0;
-      } }, l = "en", v = {};
-      v[l] = B;
+      } }, l = "en", b = {};
+      b[l] = B;
       var T = "$isDayjsObject", Y = function(N) {
         return N instanceof Z || !(!N || !N[T]);
       }, q = function N(g, k, S) {
-        var b;
+        var w;
         if (!g) return l;
         if (typeof g == "string") {
           var $ = g.toLowerCase();
-          v[$] && (b = $), k && (v[$] = k, b = $);
+          b[$] && (w = $), k && (b[$] = k, w = $);
           var M = g.split("-");
-          if (!b && M.length > 1) return N(M[0]);
+          if (!w && M.length > 1) return N(M[0]);
         } else {
           var R = g.name;
-          v[R] = g, b = R;
+          b[R] = g, w = R;
         }
-        return !S && b && (l = b), b || !S && l;
+        return !S && w && (l = w), w || !S && l;
       }, E = function(N, g) {
         if (Y(N)) return N.clone();
         var k = typeof g == "object" ? g : {};
@@ -2669,18 +2671,18 @@ function Ms() {
         var g = N.prototype;
         return g.parse = function(k) {
           this.$d = (function(S) {
-            var b = S.date, $ = S.utc;
-            if (b === null) return /* @__PURE__ */ new Date(NaN);
-            if (C.u(b)) return /* @__PURE__ */ new Date();
-            if (b instanceof Date) return new Date(b);
-            if (typeof b == "string" && !/Z$/i.test(b)) {
-              var M = b.match(W);
+            var w = S.date, $ = S.utc;
+            if (w === null) return /* @__PURE__ */ new Date(NaN);
+            if (C.u(w)) return /* @__PURE__ */ new Date();
+            if (w instanceof Date) return new Date(w);
+            if (typeof w == "string" && !/Z$/i.test(w)) {
+              var M = w.match(W);
               if (M) {
                 var R = M[2] - 1 || 0, G = (M[7] || "0").substring(0, 3);
                 return $ ? new Date(Date.UTC(M[1], R, M[3] || 1, M[4] || 0, M[5] || 0, M[6] || 0, G)) : new Date(M[1], R, M[3] || 1, M[4] || 0, M[5] || 0, M[6] || 0, G);
               }
             }
-            return new Date(b);
+            return new Date(w);
           })(k), this.init();
         }, g.init = function() {
           var k = this.$d;
@@ -2690,24 +2692,24 @@ function Ms() {
         }, g.isValid = function() {
           return this.$d.toString() !== P;
         }, g.isSame = function(k, S) {
-          var b = E(k);
-          return this.startOf(S) <= b && b <= this.endOf(S);
+          var w = E(k);
+          return this.startOf(S) <= w && w <= this.endOf(S);
         }, g.isAfter = function(k, S) {
           return E(k) < this.startOf(S);
         }, g.isBefore = function(k, S) {
           return this.endOf(S) < E(k);
-        }, g.$g = function(k, S, b) {
-          return C.u(k) ? this[S] : this.set(b, k);
+        }, g.$g = function(k, S, w) {
+          return C.u(k) ? this[S] : this.set(w, k);
         }, g.unix = function() {
           return Math.floor(this.valueOf() / 1e3);
         }, g.valueOf = function() {
           return this.$d.getTime();
         }, g.startOf = function(k, S) {
-          var b = this, $ = !!C.u(S) || S, M = C.p(k), R = function(ae, Q) {
-            var ce = C.w(b.$u ? Date.UTC(b.$y, Q, ae) : new Date(b.$y, Q, ae), b);
+          var w = this, $ = !!C.u(S) || S, M = C.p(k), R = function(ae, Q) {
+            var ce = C.w(w.$u ? Date.UTC(w.$y, Q, ae) : new Date(w.$y, Q, ae), w);
             return $ ? ce : ce.endOf(c);
           }, G = function(ae, Q) {
-            return C.w(b.toDate()[ae].apply(b.toDate("s"), ($ ? [0, 0, 0, 0] : [23, 59, 59, 999]).slice(Q)), b);
+            return C.w(w.toDate()[ae].apply(w.toDate("s"), ($ ? [0, 0, 0, 0] : [23, 59, 59, 999]).slice(Q)), w);
           }, oe = this.$W, ee = this.$M, x = this.$D, j = "set" + (this.$u ? "UTC" : "");
           switch (M) {
             case _:
@@ -2732,7 +2734,7 @@ function Ms() {
         }, g.endOf = function(k) {
           return this.startOf(k, !1);
         }, g.$set = function(k, S) {
-          var b, $ = C.p(k), M = "set" + (this.$u ? "UTC" : ""), R = (b = {}, b[c] = M + "Date", b[I] = M + "Date", b[f] = M + "Month", b[_] = M + "FullYear", b[d] = M + "Hours", b[s] = M + "Minutes", b[i] = M + "Seconds", b[a] = M + "Milliseconds", b)[$], G = $ === c ? this.$D + (S - this.$W) : S;
+          var w, $ = C.p(k), M = "set" + (this.$u ? "UTC" : ""), R = (w = {}, w[c] = M + "Date", w[I] = M + "Date", w[f] = M + "Month", w[_] = M + "FullYear", w[d] = M + "Hours", w[s] = M + "Minutes", w[i] = M + "Seconds", w[a] = M + "Milliseconds", w)[$], G = $ === c ? this.$D + (S - this.$W) : S;
           if ($ === f || $ === _) {
             var oe = this.clone().set(I, 1);
             oe.$d[R](G), oe.init(), this.$d = oe.set(I, Math.min(this.$D, oe.daysInMonth())).$d;
@@ -2743,7 +2745,7 @@ function Ms() {
         }, g.get = function(k) {
           return this[C.p(k)]();
         }, g.add = function(k, S) {
-          var b, $ = this;
+          var w, $ = this;
           k = Number(k);
           var M = C.p(S), R = function(ee) {
             var x = E($);
@@ -2753,14 +2755,14 @@ function Ms() {
           if (M === _) return this.set(_, this.$y + k);
           if (M === c) return R(1);
           if (M === m) return R(7);
-          var G = (b = {}, b[s] = r, b[d] = o, b[i] = n, b)[M] || 1, oe = this.$d.getTime() + k * G;
+          var G = (w = {}, w[s] = r, w[d] = o, w[i] = n, w)[M] || 1, oe = this.$d.getTime() + k * G;
           return C.w(oe, this);
         }, g.subtract = function(k, S) {
           return this.add(-1 * k, S);
         }, g.format = function(k) {
-          var S = this, b = this.$locale();
-          if (!this.isValid()) return b.invalidDate || P;
-          var $ = k || "YYYY-MM-DDTHH:mm:ssZ", M = C.z(this), R = this.$H, G = this.$m, oe = this.$M, ee = b.weekdays, x = b.months, j = b.meridiem, K = function(Q, ce, fe, Ne) {
+          var S = this, w = this.$locale();
+          if (!this.isValid()) return w.invalidDate || P;
+          var $ = k || "YYYY-MM-DDTHH:mm:ssZ", M = C.z(this), R = this.$H, G = this.$m, oe = this.$M, ee = w.weekdays, x = w.months, j = w.meridiem, K = function(Q, ce, fe, Ne) {
             return Q && (Q[ce] || Q(S, $)) || fe[ce].slice(0, Ne);
           }, re = function(Q) {
             return C.s(R % 12 || 12, Q, "0");
@@ -2780,7 +2782,7 @@ function Ms() {
                 case "MM":
                   return C.s(oe + 1, 2, "0");
                 case "MMM":
-                  return K(b.monthsShort, oe, x, 3);
+                  return K(w.monthsShort, oe, x, 3);
                 case "MMMM":
                   return K(x, oe);
                 case "D":
@@ -2790,9 +2792,9 @@ function Ms() {
                 case "d":
                   return String(S.$W);
                 case "dd":
-                  return K(b.weekdaysMin, S.$W, ee, 2);
+                  return K(w.weekdaysMin, S.$W, ee, 2);
                 case "ddd":
-                  return K(b.weekdaysShort, S.$W, ee, 3);
+                  return K(w.weekdaysShort, S.$W, ee, 3);
                 case "dddd":
                   return ee[S.$W];
                 case "H":
@@ -2825,7 +2827,7 @@ function Ms() {
           }));
         }, g.utcOffset = function() {
           return 15 * -Math.round(this.$d.getTimezoneOffset() / 15);
-        }, g.diff = function(k, S, b) {
+        }, g.diff = function(k, S, w) {
           var $, M = this, R = C.p(S), G = E(k), oe = (G.utcOffset() - this.utcOffset()) * r, ee = this - G, x = function() {
             return C.m(M, G);
           };
@@ -2857,15 +2859,15 @@ function Ms() {
             default:
               $ = ee;
           }
-          return b ? $ : C.a($);
+          return w ? $ : C.a($);
         }, g.daysInMonth = function() {
           return this.endOf(f).$D;
         }, g.$locale = function() {
-          return v[this.$L];
+          return b[this.$L];
         }, g.locale = function(k, S) {
           if (!k) return this.$L;
-          var b = this.clone(), $ = q(k, S, !0);
-          return $ && (b.$L = $), b;
+          var w = this.clone(), $ = q(k, S, !0);
+          return $ && (w.$L = $), w;
         }, g.clone = function() {
           return C.w(this.$d, this);
         }, g.toDate = function() {
@@ -2886,7 +2888,7 @@ function Ms() {
         return N.$i || (N(g, Z, E), N.$i = !0), E;
       }, E.locale = q, E.isDayjs = Y, E.unix = function(N) {
         return E(1e3 * N);
-      }, E.en = v[l], E.Ls = v, E.p = {}, E;
+      }, E.en = b[l], E.Ls = b, E.p = {}, E;
     }));
   })(At)), At.exports;
 }
@@ -2914,11 +2916,11 @@ function Cs({
   startFieldError: _,
   setStartFieldError: I
 }) {
-  const P = _e(null), [W, O] = ne(0), [B, w] = ne(
+  const P = _e(null), [W, O] = ne(0), [B, v] = ne(
     () => Ht(e)
   ), [p, l] = ne(
     () => Ht(t)
-  ), v = o || r, Y = v === "week" && r !== "week" || v === "month" && r !== "month" || v === "quarter" && r !== "quarter" ? "" : n;
+  ), b = o || r, Y = b === "week" && r !== "week" || b === "month" && r !== "month" || b === "quarter" && r !== "quarter" ? "" : n;
   Me(() => {
     if (P.current) {
       const g = document.createElement("canvas").getContext("2d");
@@ -2973,13 +2975,13 @@ function Cs({
   });
   Me(() => {
     const N = Ht(e);
-    w(N), (!e || N && N.isValid()) && I(!1);
+    v(N), (!e || N && N.isValid()) && I(!1);
   }, [e]), Me(() => {
     const N = Ht(t);
     l(N), (!t || N && N.isValid()) && D(!1);
   }, [t]);
   const E = (N, g) => {
-    w(N), g?.validationError == null && (N ? N.isValid() && s(N.format("YYYY-MM-DD")) : s(""));
+    v(N), g?.validationError == null && (N ? N.isValid() && s(N.format("YYYY-MM-DD")) : s(""));
   }, C = (N) => {
     I(N != null);
   }, Z = (N, g) => {
@@ -3112,7 +3114,7 @@ function Cs({
           {
             className: `absolute top-1/2 -translate-y-1/2 text-[12px] pointer-events-none ${a ? "text-gray-300" : "text-gray-500"}`,
             style: { left: `${W}px` },
-            children: ps(v)
+            children: ps(b)
           }
         )
       ] })
@@ -3186,11 +3188,11 @@ function Ys({
   setExcludedSavedDates: W,
   setExcludedSpecificDates: O,
   setExcludedDateRanges: B,
-  setExcludeFilterTypes: w,
+  setExcludeFilterTypes: v,
   setActiveFilterView: p,
   savedDatesForFilter: l
 }) {
-  const [v, T] = ne(!1), [Y, q] = ne(!1), [E, C] = ne(!1), Z = _e(null), le = _e(null), N = _e(null), g = _e(null);
+  const [b, T] = ne(!1), [Y, q] = ne(!1), [E, C] = ne(!1), Z = _e(null), le = _e(null), N = _e(null), g = _e(null);
   Me(() => {
     function x(j) {
       if (!n) return;
@@ -3205,10 +3207,10 @@ function Ys({
       const K = j.target, re = Z.current && Z.current.contains(K), ae = le.current && le.current.contains(K);
       !re && !ae && T(!1);
     }
-    return v && document.addEventListener("mousedown", x), () => {
+    return b && document.addEventListener("mousedown", x), () => {
       document.removeEventListener("mousedown", x);
     };
-  }, [v]);
+  }, [b]);
   const k = $e(() => {
     const x = /* @__PURE__ */ new Map();
     for (const j of l)
@@ -3216,7 +3218,7 @@ function Ys({
     return x;
   }, [l]), S = An.filter(
     (x) => r.includes(x.value)
-  ), b = o.map((x) => k.get(x)).filter((x) => !!x), $ = (x) => {
+  ), w = o.map((x) => k.get(x)).filter((x) => !!x), $ = (x) => {
     const j = /* @__PURE__ */ new Date(x.selection.startDateUtc + "T00:00:00"), K = /* @__PURE__ */ new Date(x.selection.endDateUtc + "T00:00:00"), re = {
       month: "short",
       day: "numeric",
@@ -3231,14 +3233,14 @@ function Ys({
       if (!j.includes(x))
         return j;
       const K = j.filter((re) => re !== x);
-      return K.length === 0 && w(
+      return K.length === 0 && v(
         (re) => re.filter((ae) => ae !== "saved-dates")
       ), K;
     });
   }, G = (x) => {
     B((j) => {
       const K = j.filter((re) => re.id !== x);
-      return K.length === 0 && w(
+      return K.length === 0 && v(
         (re) => re.filter((ae) => ae !== "date-range")
       ), K;
     });
@@ -3251,7 +3253,7 @@ function Ys({
       title: jn[x.value] ?? x.label,
       onRemove: () => I(x.value)
     })),
-    ...b.map((x) => ({
+    ...w.map((x) => ({
       id: `saved-${x.id}`,
       label: M(x),
       title: $(x),
@@ -3276,7 +3278,7 @@ function Ys({
   ];
   return Me(() => {
     const x = () => {
-      if (N.current && !e && !v) {
+      if (N.current && !e && !b) {
         const j = N.current, K = j.scrollWidth > j.clientWidth;
         C(K);
       } else
@@ -3285,7 +3287,7 @@ function Ys({
     return x(), window.addEventListener("resize", x), () => {
       window.removeEventListener("resize", x);
     };
-  }, [e, v, ee.length]), /* @__PURE__ */ H("div", { className: " border-b border-gray-200 ", children: [
+  }, [e, b, ee.length]), /* @__PURE__ */ H("div", { className: " border-b border-gray-200 ", children: [
     /* @__PURE__ */ H("div", { className: "py-2 flex items-center gap-3 px-4 h-[45px]", children: [
       /* @__PURE__ */ H("div", { className: "flex items-center gap-2", children: [
         /* @__PURE__ */ h(
@@ -3296,7 +3298,7 @@ function Ys({
             checked: e || ee.length > 0,
             onChange: (x) => {
               const j = x.target.checked;
-              c(j), !j && !e && ee.length > 0 && (W([]), O([]), B([]), w([]), r.forEach((K) => I(K)));
+              c(j), !j && !e && ee.length > 0 && (W([]), O([]), B([]), v([]), r.forEach((K) => I(K)));
             },
             className: `w-4 h-4 border-gray-300 rounded focus:ring-blue-500 ${!e && ee.length > 0 ? "accent-[#61708F]" : "text-blue-600"}`
           }
@@ -3409,13 +3411,13 @@ function Ys({
                             const Q = ae.filter(
                               (ce) => ce !== x.id
                             );
-                            return Q.length === 0 && w(
+                            return Q.length === 0 && v(
                               (ce) => ce.filter(
                                 (fe) => fe !== "saved-dates"
                               )
                             ), Q;
                           }
-                          return w((Q) => Q.includes("saved-dates") ? Q : [...Q, "saved-dates"]), [...ae, x.id];
+                          return v((Q) => Q.includes("saved-dates") ? Q : [...Q, "saved-dates"]), [...ae, x.id];
                         });
                       },
                       className: `w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors ${j ? "bg-[#CEDBF5] " : "bg-white  hover:bg-gray-50"}`,
@@ -3468,7 +3470,7 @@ function Ys({
             "div",
             {
               ref: N,
-              className: `flex gap-2 ${e || v ? "flex-wrap" : "flex-nowrap overflow-hidden"}`,
+              className: `flex gap-2 ${e || b ? "flex-wrap" : "flex-nowrap overflow-hidden"}`,
               children: ee.map((x) => /* @__PURE__ */ H(
                 "span",
                 {
@@ -3492,7 +3494,7 @@ function Ys({
               ))
             }
           ),
-          !e && !v && E && /* @__PURE__ */ h(
+          !e && !b && E && /* @__PURE__ */ h(
             "div",
             {
               className: "absolute right-0 top-0 bottom-0 w-16 pointer-events-none",
@@ -3502,7 +3504,7 @@ function Ys({
             }
           )
         ] }),
-        !e && !v && E && /* @__PURE__ */ H(
+        !e && !b && E && /* @__PURE__ */ H(
           "button",
           {
             type: "button",
@@ -3515,7 +3517,7 @@ function Ys({
           }
         )
       ] }),
-      v && !e && // Only show expanded card if NOT enabled (read-only view)
+      b && !e && // Only show expanded card if NOT enabled (read-only view)
       /* @__PURE__ */ h(
         "div",
         {
@@ -3623,7 +3625,7 @@ function vr(e) {
   const D = ot(e.timeZone, e), _ = D > 0 ? Math.floor(D) : Math.ceil(D), P = -(/* @__PURE__ */ new Date(+e)).getTimezoneOffset() - _, W = _ !== n, O = P - d;
   if (W && O) {
     Date.prototype.setUTCMinutes.call(e, Date.prototype.getUTCMinutes.call(e) + O);
-    const B = ot(e.timeZone, e), w = B > 0 ? Math.floor(B) : Math.ceil(B), p = _ - w;
+    const B = ot(e.timeZone, e), v = B > 0 ? Math.floor(B) : Math.ceil(B), p = _ - v;
     p && (e.internal.setUTCMinutes(e.internal.getUTCMinutes() + p), Date.prototype.setUTCMinutes.call(e, Date.prototype.getUTCMinutes.call(e) + p));
   }
 }
@@ -4058,7 +4060,7 @@ function Ze(e, t, n = Re) {
   });
 }
 function gi(e, t, n, r, o) {
-  const { disabled: a, hidden: i, modifiers: s, showOutsideDays: d, broadcastCalendar: c, today: m } = t, { isSameDay: f, isSameMonth: D, startOfMonth: _, isBefore: I, endOfMonth: P, isAfter: W } = o, O = n && _(n), B = r && P(r), w = {
+  const { disabled: a, hidden: i, modifiers: s, showOutsideDays: d, broadcastCalendar: c, today: m } = t, { isSameDay: f, isSameMonth: D, startOfMonth: _, isBefore: I, endOfMonth: P, isAfter: W } = o, O = n && _(n), B = r && P(r), v = {
     [ye.focused]: [],
     [ye.outside]: [],
     [ye.disabled]: [],
@@ -4066,29 +4068,29 @@ function gi(e, t, n, r, o) {
     [ye.today]: []
   }, p = {};
   for (const l of e) {
-    const { date: v, displayMonth: T } = l, Y = !!(T && !D(v, T)), q = !!(O && I(v, O)), E = !!(B && W(v, B)), C = !!(a && Ze(v, a, o)), Z = !!(i && Ze(v, i, o)) || q || E || // Broadcast calendar will show outside days as default
-    !c && !d && Y || c && d === !1 && Y, le = f(v, m ?? o.today());
-    Y && w.outside.push(l), C && w.disabled.push(l), Z && w.hidden.push(l), le && w.today.push(l), s && Object.keys(s).forEach((N) => {
+    const { date: b, displayMonth: T } = l, Y = !!(T && !D(b, T)), q = !!(O && I(b, O)), E = !!(B && W(b, B)), C = !!(a && Ze(b, a, o)), Z = !!(i && Ze(b, i, o)) || q || E || // Broadcast calendar will show outside days as default
+    !c && !d && Y || c && d === !1 && Y, le = f(b, m ?? o.today());
+    Y && v.outside.push(l), C && v.disabled.push(l), Z && v.hidden.push(l), le && v.today.push(l), s && Object.keys(s).forEach((N) => {
       const g = s?.[N];
-      g && Ze(v, g, o) && (p[N] ? p[N].push(l) : p[N] = [l]);
+      g && Ze(b, g, o) && (p[N] ? p[N].push(l) : p[N] = [l]);
     });
   }
   return (l) => {
-    const v = {
+    const b = {
       [ye.focused]: !1,
       [ye.disabled]: !1,
       [ye.hidden]: !1,
       [ye.outside]: !1,
       [ye.today]: !1
     }, T = {};
-    for (const Y in w) {
-      const q = w[Y];
-      v[Y] = q.some((E) => E === l);
+    for (const Y in v) {
+      const q = v[Y];
+      b[Y] = q.some((E) => E === l);
     }
     for (const Y in p)
       T[Y] = p[Y].some((q) => q === l);
     return {
-      ...v,
+      ...b,
       // custom modifiers should override all the previous ones
       ...T
     };
@@ -4272,15 +4274,15 @@ function Qi(e, t, { classNames: n, months: r, focused: o, dateLib: a }) {
     r.length === 0 || c.length === 0 || r.length !== c.length)
       return;
     const m = a.isSameMonth(r[0].date, c[0].date), f = a.isAfter(r[0].date, c[0].date), D = f ? n[We.caption_after_enter] : n[We.caption_before_enter], _ = f ? n[We.weeks_after_enter] : n[We.weeks_before_enter], I = i.current, P = e.current.cloneNode(!0);
-    if (P instanceof HTMLElement ? (rn(P).forEach((w) => {
-      if (!(w instanceof HTMLElement))
+    if (P instanceof HTMLElement ? (rn(P).forEach((v) => {
+      if (!(v instanceof HTMLElement))
         return;
-      const p = qi(w);
-      p && w.contains(p) && w.removeChild(p);
-      const l = on(w);
+      const p = qi(v);
+      p && v.contains(p) && v.removeChild(p);
+      const l = on(v);
       l && l.classList.remove(D);
-      const v = an(w);
-      v && v.classList.remove(_);
+      const b = an(v);
+      b && b.classList.remove(_);
     }), i.current = P) : i.current = null, d.current || m || // skip animation if a day is focused because it can cause issues to the animation and is better for a11y
     o)
       return;
@@ -4288,17 +4290,17 @@ function Qi(e, t, { classNames: n, months: r, focused: o, dateLib: a }) {
     if (O?.every((B) => B instanceof HTMLElement) && W && W.every((B) => B instanceof HTMLElement)) {
       d.current = !0, e.current.style.isolation = "isolate";
       const B = zi(e.current);
-      B && (B.style.zIndex = "1"), O.forEach((w, p) => {
+      B && (B.style.zIndex = "1"), O.forEach((v, p) => {
         const l = W[p];
         if (!l)
           return;
-        w.style.position = "relative", w.style.overflow = "hidden";
-        const v = on(w);
-        v && v.classList.add(D);
-        const T = an(w);
+        v.style.position = "relative", v.style.overflow = "hidden";
+        const b = on(v);
+        b && b.classList.add(D);
+        const T = an(v);
         T && T.classList.add(_);
         const Y = () => {
-          d.current = !1, e.current && (e.current.style.isolation = ""), B && (B.style.zIndex = ""), v && v.classList.remove(D), T && T.classList.remove(_), w.style.position = "", w.style.overflow = "", w.contains(l) && w.removeChild(l);
+          d.current = !1, e.current && (e.current.style.isolation = ""), B && (B.style.zIndex = ""), b && b.classList.remove(D), T && T.classList.remove(_), v.style.position = "", v.style.overflow = "", v.contains(l) && v.removeChild(l);
         };
         l.style.pointerEvents = "none", l.style.position = "absolute", l.style.overflow = "hidden", l.setAttribute("aria-hidden", "true");
         const q = Zi(l);
@@ -4306,14 +4308,14 @@ function Qi(e, t, { classNames: n, months: r, focused: o, dateLib: a }) {
         const E = on(l);
         E && (E.classList.add(f ? n[We.caption_before_exit] : n[We.caption_after_exit]), E.addEventListener("animationend", Y));
         const C = an(l);
-        C && C.classList.add(f ? n[We.weeks_before_exit] : n[We.weeks_after_exit]), w.insertBefore(l, w.firstChild);
+        C && C.classList.add(f ? n[We.weeks_before_exit] : n[We.weeks_after_exit]), v.insertBefore(l, v.firstChild);
       });
     }
   });
 }
 function Gi(e, t, n, r) {
-  const o = e[0], a = e[e.length - 1], { ISOWeek: i, fixedWeeks: s, broadcastCalendar: d } = n ?? {}, { addDays: c, differenceInCalendarDays: m, differenceInCalendarMonths: f, endOfBroadcastWeek: D, endOfISOWeek: _, endOfMonth: I, endOfWeek: P, isAfter: W, startOfBroadcastWeek: O, startOfISOWeek: B, startOfWeek: w } = r, p = d ? O(o, r) : i ? B(o) : w(o), l = d ? D(a) : i ? _(I(a)) : P(I(a)), v = m(l, p), T = f(a, o) + 1, Y = [];
-  for (let C = 0; C <= v; C++) {
+  const o = e[0], a = e[e.length - 1], { ISOWeek: i, fixedWeeks: s, broadcastCalendar: d } = n ?? {}, { addDays: c, differenceInCalendarDays: m, differenceInCalendarMonths: f, endOfBroadcastWeek: D, endOfISOWeek: _, endOfMonth: I, endOfWeek: P, isAfter: W, startOfBroadcastWeek: O, startOfISOWeek: B, startOfWeek: v } = r, p = d ? O(o, r) : i ? B(o) : v(o), l = d ? D(a) : i ? _(I(a)) : P(I(a)), b = m(l, p), T = f(a, o) + 1, Y = [];
+  for (let C = 0; C <= b; C++) {
     const Z = c(p, C);
     if (t && W(Z, t))
       break;
@@ -4358,19 +4360,19 @@ function zn(e, t, n, r) {
 }
 function Ji(e, t, n, r) {
   const { addDays: o, endOfBroadcastWeek: a, endOfISOWeek: i, endOfMonth: s, endOfWeek: d, getISOWeek: c, getWeek: m, startOfBroadcastWeek: f, startOfISOWeek: D, startOfWeek: _ } = r, I = e.reduce((P, W) => {
-    const O = n.broadcastCalendar ? f(W, r) : n.ISOWeek ? D(W) : _(W), B = n.broadcastCalendar ? a(W) : n.ISOWeek ? i(s(W)) : d(s(W)), w = t.filter((T) => T >= O && T <= B), p = n.broadcastCalendar ? 35 : 42;
-    if (n.fixedWeeks && w.length < p) {
+    const O = n.broadcastCalendar ? f(W, r) : n.ISOWeek ? D(W) : _(W), B = n.broadcastCalendar ? a(W) : n.ISOWeek ? i(s(W)) : d(s(W)), v = t.filter((T) => T >= O && T <= B), p = n.broadcastCalendar ? 35 : 42;
+    if (n.fixedWeeks && v.length < p) {
       const T = t.filter((Y) => {
-        const q = p - w.length;
+        const q = p - v.length;
         return Y > B && Y <= o(B, q);
       });
-      w.push(...T);
+      v.push(...T);
     }
-    const l = w.reduce((T, Y) => {
+    const l = v.reduce((T, Y) => {
       const q = n.ISOWeek ? c(Y) : m(Y), E = T.find((Z) => Z.weekNumber === q), C = new Mr(Y, W, r);
       return E ? E.days.push(C) : T.push(new As(q, [C])), T;
-    }, []), v = new Hs(W, l);
-    return P.push(v), P;
+    }, []), b = new Hs(W, l);
+    return P.push(b), P;
   }, []);
   return n.reverseMonths ? I.reverse() : I;
 }
@@ -4417,13 +4419,13 @@ function rc(e, t) {
     e.month ? i : void 0
   );
   Me(() => {
-    const v = zn(e, n, r, t);
-    d(v);
+    const b = zn(e, n, r, t);
+    d(b);
   }, [e.timeZone]);
-  const c = Xi(s, r, e, t), m = Gi(c, e.endMonth ? a(e.endMonth) : void 0, e, t), f = Ji(c, m, e, t), D = nc(f), _ = Ki(f), I = tc(s, n, e, t), P = ec(s, r, e, t), { disableNavigation: W, onMonthChange: O } = e, B = (v) => D.some((T) => T.days.some((Y) => Y.isEqualTo(v))), w = (v) => {
+  const c = Xi(s, r, e, t), m = Gi(c, e.endMonth ? a(e.endMonth) : void 0, e, t), f = Ji(c, m, e, t), D = nc(f), _ = Ki(f), I = tc(s, n, e, t), P = ec(s, r, e, t), { disableNavigation: W, onMonthChange: O } = e, B = (b) => D.some((T) => T.days.some((Y) => Y.isEqualTo(b))), v = (b) => {
     if (W)
       return;
-    let T = o(v);
+    let T = o(b);
     n && T < o(n) && (T = o(n)), r && T > o(r) && (T = o(r)), d(T), O?.(T);
   };
   return {
@@ -4434,9 +4436,9 @@ function rc(e, t) {
     navEnd: r,
     previousMonth: I,
     nextMonth: P,
-    goToMonth: w,
-    goToDay: (v) => {
-      B(v) || w(v.date);
+    goToMonth: v,
+    goToDay: (b) => {
+      B(b) || v(b.date);
     }
   };
 }
@@ -4456,16 +4458,16 @@ function oc(e, t, n, r) {
   return o || (o = e.find((i) => Zn(t(i)))), o;
 }
 function ac(e, t, n, r, o, a, i) {
-  const { ISOWeek: s, broadcastCalendar: d } = a, { addDays: c, addMonths: m, addWeeks: f, addYears: D, endOfBroadcastWeek: _, endOfISOWeek: I, endOfWeek: P, max: W, min: O, startOfBroadcastWeek: B, startOfISOWeek: w, startOfWeek: p } = i;
-  let v = {
+  const { ISOWeek: s, broadcastCalendar: d } = a, { addDays: c, addMonths: m, addWeeks: f, addYears: D, endOfBroadcastWeek: _, endOfISOWeek: I, endOfWeek: P, max: W, min: O, startOfBroadcastWeek: B, startOfISOWeek: v, startOfWeek: p } = i;
+  let b = {
     day: c,
     week: f,
     month: m,
     year: D,
-    startOfWeek: (T) => d ? B(T, i) : s ? w(T) : p(T),
+    startOfWeek: (T) => d ? B(T, i) : s ? v(T) : p(T),
     endOfWeek: (T) => d ? _(T) : s ? I(T) : P(T)
   }[e](n, t === "after" ? 1 : -1);
-  return t === "before" && r ? v = W([r, v]) : t === "after" && o && (v = O([o, v])), v;
+  return t === "before" && r ? b = W([r, b]) : t === "after" && o && (b = O([o, b])), b;
 }
 function $r(e, t, n, r, o, a, i, s = 0) {
   if (s > 365)
@@ -4486,7 +4488,7 @@ function sc(e, t, n, r, o) {
       if (!c)
         return;
       const O = $r(P, W, c, t.navStart, t.navEnd, e, o);
-      O && (e.disableNavigation && !t.days.some((w) => w.isEqualTo(O)) || (t.goToDay(O), m(O)));
+      O && (e.disableNavigation && !t.days.some((v) => v.isEqualTo(O)) || (t.goToDay(O), m(O)));
     }
   };
 }
@@ -4643,9 +4645,9 @@ function ht(e) {
     t.formatters,
     t.labels,
     t.classNames
-  ]), { captionLayout: d, mode: c, navLayout: m, numberOfMonths: f = 1, onDayBlur: D, onDayClick: _, onDayFocus: I, onDayKeyDown: P, onDayMouseEnter: W, onDayMouseLeave: O, onNextClick: B, onPrevClick: w, showWeekNumber: p, styles: l } = t, { formatCaption: v, formatDay: T, formatMonthDropdown: Y, formatWeekNumber: q, formatWeekNumberHeader: E, formatWeekdayName: C, formatYearDropdown: Z } = r, le = rc(t, a), { days: N, months: g, navStart: k, navEnd: S, previousMonth: b, nextMonth: $, goToMonth: M } = le, R = gi(N, t, k, S, a), { isSelected: G, select: oe, selected: ee } = hc(t, a) ?? {}, { blur: x, focused: j, isFocusTarget: K, moveFocus: re, setFocused: ae } = sc(t, le, R, G ?? (() => !1), a), { labelDayButton: Q, labelGridcell: ce, labelGrid: fe, labelMonthDropdown: Ne, labelNav: Se, labelPrevious: Ie, labelNext: Je, labelWeekday: yt, labelWeekNumber: xt, labelWeekNumberHeader: Ve, labelYearDropdown: Ge } = o, Dt = $e(() => _i(a, t.ISOWeek), [a, t.ISOWeek]), st = c !== void 0 || _ !== void 0, Pe = se(() => {
-    b && (M(b), w?.(b));
-  }, [b, M, w]), et = se(() => {
+  ]), { captionLayout: d, mode: c, navLayout: m, numberOfMonths: f = 1, onDayBlur: D, onDayClick: _, onDayFocus: I, onDayKeyDown: P, onDayMouseEnter: W, onDayMouseLeave: O, onNextClick: B, onPrevClick: v, showWeekNumber: p, styles: l } = t, { formatCaption: b, formatDay: T, formatMonthDropdown: Y, formatWeekNumber: q, formatWeekNumberHeader: E, formatWeekdayName: C, formatYearDropdown: Z } = r, le = rc(t, a), { days: N, months: g, navStart: k, navEnd: S, previousMonth: w, nextMonth: $, goToMonth: M } = le, R = gi(N, t, k, S, a), { isSelected: G, select: oe, selected: ee } = hc(t, a) ?? {}, { blur: x, focused: j, isFocusTarget: K, moveFocus: re, setFocused: ae } = sc(t, le, R, G ?? (() => !1), a), { labelDayButton: Q, labelGridcell: ce, labelGrid: fe, labelMonthDropdown: Ne, labelNav: Se, labelPrevious: Ie, labelNext: Je, labelWeekday: yt, labelWeekNumber: xt, labelWeekNumberHeader: Ve, labelYearDropdown: Ge } = o, Dt = $e(() => _i(a, t.ISOWeek), [a, t.ISOWeek]), st = c !== void 0 || _ !== void 0, Pe = se(() => {
+    w && (M(w), v?.(w));
+  }, [w, M, v]), et = se(() => {
     $ && (M($), B?.($));
   }, [M, $, B]), bt = se((J, ge) => (X) => {
     X.preventDefault(), X.stopPropagation(), ae(J), oe?.(J.date, ge, X), _?.(J.date, ge, X);
@@ -4703,7 +4705,7 @@ function ht(e) {
     isSelected: G,
     months: g,
     nextMonth: $,
-    previousMonth: b,
+    previousMonth: w,
     goToMonth: M,
     getModifiers: R,
     components: n,
@@ -4721,7 +4723,7 @@ function ht(e) {
       U.createElement(
         n.Months,
         { className: s[L.Months], style: l?.[L.Months] },
-        !t.hideNavigation && !m && U.createElement(n.Nav, { "data-animated-nav": t.animate ? "true" : void 0, className: s[L.Nav], style: l?.[L.Nav], "aria-label": Se(), onPreviousClick: Pe, onNextClick: et, previousMonth: b, nextMonth: $ }),
+        !t.hideNavigation && !m && U.createElement(n.Nav, { "data-animated-nav": t.animate ? "true" : void 0, className: s[L.Nav], style: l?.[L.Nav], "aria-label": Se(), onPreviousClick: Pe, onNextClick: et, previousMonth: w, nextMonth: $ }),
         g.map((J, ge) => U.createElement(
           n.Month,
           {
@@ -4735,8 +4737,8 @@ function ht(e) {
           },
           m === "around" && !t.hideNavigation && ge === 0 && U.createElement(
             n.PreviousMonthButton,
-            { type: "button", className: s[L.PreviousMonthButton], tabIndex: b ? void 0 : -1, "aria-disabled": b ? void 0 : !0, "aria-label": Ie(b), onClick: Pe, "data-animated-button": t.animate ? "true" : void 0 },
-            U.createElement(n.Chevron, { disabled: b ? void 0 : !0, className: s[L.Chevron], orientation: t.dir === "rtl" ? "right" : "left" })
+            { type: "button", className: s[L.PreviousMonthButton], tabIndex: w ? void 0 : -1, "aria-disabled": w ? void 0 : !0, "aria-label": Ie(w), onClick: Pe, "data-animated-button": t.animate ? "true" : void 0 },
+            U.createElement(n.Chevron, { disabled: w ? void 0 : !0, className: s[L.Chevron], orientation: t.dir === "rtl" ? "right" : "left" })
           ),
           U.createElement(n.MonthCaption, { "data-animated-caption": t.animate ? "true" : void 0, className: s[L.MonthCaption], style: l?.[L.MonthCaption], calendarMonth: J, displayIndex: ge }, d?.startsWith("dropdown") ? U.createElement(
             n.DropdownNav,
@@ -4756,17 +4758,17 @@ function ht(e) {
               width: "1px",
               whiteSpace: "nowrap",
               wordWrap: "normal"
-            } }, v(J.date, a.options, a))
+            } }, b(J.date, a.options, a))
           ) : (
             // biome-ignore lint/a11y/useSemanticElements: breaking change
-            U.createElement(n.CaptionLabel, { className: s[L.CaptionLabel], role: "status", "aria-live": "polite" }, v(J.date, a.options, a))
+            U.createElement(n.CaptionLabel, { className: s[L.CaptionLabel], role: "status", "aria-live": "polite" }, b(J.date, a.options, a))
           )),
           m === "around" && !t.hideNavigation && ge === f - 1 && U.createElement(
             n.NextMonthButton,
             { type: "button", className: s[L.NextMonthButton], tabIndex: $ ? void 0 : -1, "aria-disabled": $ ? void 0 : !0, "aria-label": Je($), onClick: et, "data-animated-button": t.animate ? "true" : void 0 },
             U.createElement(n.Chevron, { disabled: $ ? void 0 : !0, className: s[L.Chevron], orientation: t.dir === "rtl" ? "left" : "right" })
           ),
-          ge === f - 1 && m === "after" && !t.hideNavigation && U.createElement(n.Nav, { "data-animated-nav": t.animate ? "true" : void 0, className: s[L.Nav], style: l?.[L.Nav], "aria-label": Se(), onPreviousClick: Pe, onNextClick: et, previousMonth: b, nextMonth: $ }),
+          ge === f - 1 && m === "after" && !t.hideNavigation && U.createElement(n.Nav, { "data-animated-nav": t.animate ? "true" : void 0, className: s[L.Nav], style: l?.[L.Nav], "aria-label": Se(), onPreviousClick: Pe, onNextClick: et, previousMonth: w, nextMonth: $ }),
           U.createElement(
             n.MonthGrid,
             { role: "grid", "aria-multiselectable": c === "multiple" || c === "range", "aria-label": fe(J.date, a.options, a) || void 0, className: s[L.MonthGrid], style: l?.[L.MonthGrid] },
@@ -4830,59 +4832,59 @@ function gc({
 }) {
   const a = z(jt()), i = Gn(e), s = i.from ? De(i.from) : De(a), [d, c] = ne(i), [m, f] = ne(s), D = () => {
     if (!e.from || !e.to) return !1;
-    const w = e.from.getTime() === e.to.getTime(), p = e.from.getTime() === a.getTime() && e.to.getTime() === a.getTime();
-    return w && p;
+    const v = e.from.getTime() === e.to.getTime(), p = e.from.getTime() === a.getTime() && e.to.getTime() === a.getTime();
+    return v && p;
   };
   Me(() => {
-    const w = Gn(e);
+    const v = Gn(e);
     c((p) => {
-      const l = p.from?.getTime() ?? null, v = p.to?.getTime() ?? null, T = w.from?.getTime() ?? null, Y = w.to?.getTime() ?? null;
-      if (l === T && v === Y)
+      const l = p.from?.getTime() ?? null, b = p.to?.getTime() ?? null, T = v.from?.getTime() ?? null, Y = v.to?.getTime() ?? null;
+      if (l === T && b === Y)
         return p;
-      if (w.from) {
-        const C = De(w.from);
+      if (v.from) {
+        const C = De(v.from);
         f((Z) => Z === C || Z === C - 1 ? Z : C);
       }
-      return w;
+      return v;
     });
   }, [e]);
-  const _ = (w, p) => {
+  const _ = (v, p) => {
     if (o) return;
-    const l = Et(at(/* @__PURE__ */ new Date(), w), p), v = Te(l), T = pt(l), Y = () => r?.("start"), q = () => r?.("end");
+    const l = Et(at(/* @__PURE__ */ new Date(), v), p), b = Te(l), T = pt(l), Y = () => r?.("start"), q = () => r?.("end");
     if (D()) {
-      const C = { from: v, to: T };
+      const C = { from: b, to: T };
       c(C), t(C), q();
       return;
     }
     if (n === "end") {
       if (!d.from) {
-        const k = { from: v, to: T };
+        const k = { from: b, to: T };
         c(k), t(k), q();
         return;
       }
       const C = d.from, Z = d.to ?? pt(C);
       let le = C, N = T;
-      v.getTime() < C.getTime() && (le = v, N = Z);
+      b.getTime() < C.getTime() && (le = b, N = Z);
       const g = { from: le, to: N };
       c(g), t(g), Y();
       return;
     }
-    const E = { from: v, to: T };
+    const E = { from: b, to: T };
     c(E), t(E), q();
-  }, I = (w, p) => {
+  }, I = (v, p) => {
     if (!d.from || !d.to || D()) return !1;
-    const l = rt(d.from), v = De(d.from), T = rt(d.to), Y = De(d.to), q = w * 12 + p, E = v * 12 + l, C = Y * 12 + T;
+    const l = rt(d.from), b = De(d.from), T = rt(d.to), Y = De(d.to), q = v * 12 + p, E = b * 12 + l, C = Y * 12 + T;
     return q >= E && q <= C;
-  }, P = (w, p) => {
+  }, P = (v, p) => {
     if (!d.from || D()) return !1;
-    const l = rt(d.from), v = De(d.from);
-    return w === v && p === l;
-  }, W = (w, p) => {
+    const l = rt(d.from), b = De(d.from);
+    return v === b && p === l;
+  }, W = (v, p) => {
     if (!d.to || D()) return !1;
-    const l = rt(d.to), v = De(d.to);
-    return w === v && p === l;
-  }, O = (w, p) => !1, B = (w, p, l, v) => /* @__PURE__ */ H("div", { style: { width: "224px", height: "256px" }, children: [
-    /* @__PURE__ */ H("div", { className: "flex items-center mb-4", style: { ...v }, children: [
+    const l = rt(d.to), b = De(d.to);
+    return v === b && p === l;
+  }, O = (v, p) => !1, B = (v, p, l, b) => /* @__PURE__ */ H("div", { style: { width: "224px", height: "256px" }, children: [
+    /* @__PURE__ */ H("div", { className: "flex items-center mb-4", style: { ...b }, children: [
       p && /* @__PURE__ */ h(
         "button",
         {
@@ -4892,7 +4894,7 @@ function gc({
           children: /* @__PURE__ */ h(Jn, { className: "w-4 h-4" })
         }
       ),
-      /* @__PURE__ */ h("div", { className: "text-center font-semibold text-sm px-3 py-1 rounded-md ", children: w }),
+      /* @__PURE__ */ h("div", { className: "text-center font-semibold text-sm px-3 py-1 rounded-md ", children: v }),
       l && /* @__PURE__ */ h(
         "button",
         {
@@ -4904,11 +4906,11 @@ function gc({
       )
     ] }),
     /* @__PURE__ */ h("div", { className: "grid grid-cols-3 gap-2", children: mc.map((T, Y) => {
-      const q = I(w, Y), E = P(w, Y), C = W(w, Y), Z = E || C, le = O();
+      const q = I(v, Y), E = P(v, Y), C = W(v, Y), Z = E || C, le = O();
       return /* @__PURE__ */ h(
         "button",
         {
-          onClick: () => !le && !o && _(w, Y),
+          onClick: () => !le && !o && _(v, Y),
           disabled: le || o,
           className: `
                   px-3 py-2 text-xs font-medium rounded-md transition-colors
@@ -4919,7 +4921,7 @@ function gc({
         T
       );
     }) })
-  ] }, w);
+  ] }, v);
   return /* @__PURE__ */ h("div", { className: "w-full", children: /* @__PURE__ */ H("div", { className: "flex gap-4 justify-center", children: [
     B(m, !0, !1, {
       justifyContent: "start",
@@ -4944,9 +4946,9 @@ function yc({
     return W && O;
   }, m = (W, O) => {
     if (o) return;
-    const B = Kt(at(/* @__PURE__ */ new Date(), W), O + 1), w = cn(B), p = Nn(B), l = () => r?.("start"), v = () => r?.("end");
+    const B = Kt(at(/* @__PURE__ */ new Date(), W), O + 1), v = cn(B), p = Nn(B), l = () => r?.("start"), b = () => r?.("end");
     if (c()) {
-      t({ from: w, to: p }), v();
+      t({ from: v, to: p }), b();
       return;
     }
     const T = ut(e.from), Y = De(e.from), q = cn(
@@ -4955,32 +4957,32 @@ function yc({
       Kt(at(/* @__PURE__ */ new Date(), C), E)
     );
     if (q.getTime(), Z.getTime(), n === "end") {
-      if (w.getTime() < q.getTime()) {
-        t({ from: w, to: Z }), l();
+      if (v.getTime() < q.getTime()) {
+        t({ from: v, to: Z }), l();
         return;
       }
       t({ from: q, to: p }), l();
       return;
     }
-    t({ from: w, to: p }), v();
+    t({ from: v, to: p }), b();
   }, f = (W, O) => {
     if (!e.from || !e.to || c()) return !1;
-    const B = ut(e.from) - 1, w = De(e.from), p = ut(e.to) - 1, l = De(e.to), v = W * 4 + O, T = w * 4 + B, Y = l * 4 + p;
-    return v >= T && v <= Y;
+    const B = ut(e.from) - 1, v = De(e.from), p = ut(e.to) - 1, l = De(e.to), b = W * 4 + O, T = v * 4 + B, Y = l * 4 + p;
+    return b >= T && b <= Y;
   }, D = (W, O) => {
     if (!e.from || c()) return !1;
-    const B = ut(e.from) - 1, w = De(e.from);
-    return W === w && O === B;
+    const B = ut(e.from) - 1, v = De(e.from);
+    return W === v && O === B;
   }, _ = (W, O) => {
     if (!e.to || c()) return !1;
-    const B = ut(e.to) - 1, w = De(e.to);
-    return W === w && O === B;
-  }, I = (W, O) => !1, P = (W, O, B, w) => /* @__PURE__ */ H("div", { style: { width: "224px", height: "256px" }, children: [
+    const B = ut(e.to) - 1, v = De(e.to);
+    return W === v && O === B;
+  }, I = (W, O) => !1, P = (W, O, B, v) => /* @__PURE__ */ H("div", { style: { width: "224px", height: "256px" }, children: [
     /* @__PURE__ */ H(
       "div",
       {
         className: "flex items-center justify-center gap-2 mb-4",
-        style: { ...w },
+        style: { ...v },
         children: [
           O && /* @__PURE__ */ h(
             "button",
@@ -5005,7 +5007,7 @@ function yc({
       }
     ),
     /* @__PURE__ */ h("div", { className: "grid grid-cols-2 gap-3", children: pc.map((p, l) => {
-      const v = f(W, l), T = D(W, l), Y = _(W, l), q = T || Y, E = I();
+      const b = f(W, l), T = D(W, l), Y = _(W, l), q = T || Y, E = I();
       return /* @__PURE__ */ h(
         "button",
         {
@@ -5013,7 +5015,7 @@ function yc({
           disabled: E || o,
           className: `
                   px-4 py-6 text-base font-medium rounded-md transition-colors
-                  ${E || o ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed" : q ? "bg-[#003DB8] text-white" : v ? "bg-[#CEDBF5] text-[#1F1F1F]" : "bg-gray-50 text-gray-700 hover:bg-gray-100"}
+                  ${E || o ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed" : q ? "bg-[#003DB8] text-white" : b ? "bg-[#CEDBF5] text-[#1F1F1F]" : "bg-gray-50 text-gray-700 hover:bg-gray-100"}
                 `,
           children: p
         },
@@ -5052,10 +5054,10 @@ function xc({
   handleResetCalendarSelect: W,
   handleWeekCalendarSelect: O,
   monthQuarterRange: B,
-  activeDateField: w,
+  activeDateField: v,
   setActiveDateField: p,
   onMonthSelect: l,
-  onYearSelect: v,
+  onYearSelect: b,
   todayDateObj: T,
   onDayClick: Y,
   endFieldError: q,
@@ -5149,14 +5151,14 @@ function xc({
           M.appendChild(Ne), M.appendChild(fe);
         }
       }
-    }, b = (M, R) => {
+    }, w = (M, R) => {
       if (!M) return;
       M.querySelectorAll(".rdp-caption_label").forEach((oe, ee) => {
         const x = oe, j = R !== null ? R : ee === 0 ? 0 : 1;
         s === j || f === j || S(x, j);
       });
     }, $ = setTimeout(() => {
-      s === null && f === null ? b(C.current, null) : (b(C.current, 0), b(Z.current, 1));
+      s === null && f === null ? w(C.current, null) : (w(C.current, 0), w(Z.current, 1));
     }, 150);
     return () => clearTimeout($);
   }, [
@@ -5170,8 +5172,8 @@ function xc({
     D
   ]);
   const le = (S) => {
-    const b = S - 1, $ = S + 10, M = De(r), R = [];
-    for (let G = b; G <= $; G++)
+    const w = S - 1, $ = S + 10, M = De(r), R = [];
+    for (let G = w; G <= $; G++)
       R.push(G);
     return /* @__PURE__ */ H(
       "div",
@@ -5237,7 +5239,7 @@ function xc({
             return /* @__PURE__ */ h(
               "button",
               {
-                onClick: () => v(G),
+                onClick: () => b(G),
                 disabled: oe,
                 className: `
                   px-3 py-2 text-xs font-medium rounded-md transition-colors flex items-center justify-center
@@ -5307,7 +5309,7 @@ function xc({
             }
           )
         ] }),
-        /* @__PURE__ */ h("div", { className: "grid grid-cols-3 gap-2 w-full", children: Ws.map((b, $) => {
+        /* @__PURE__ */ h("div", { className: "grid grid-cols-3 gap-2 w-full", children: Ws.map((w, $) => {
           const M = !ln, R = De(r) === S && rt(r) === $;
           return /* @__PURE__ */ h(
             "button",
@@ -5319,9 +5321,9 @@ function xc({
                   ${R ? "bg-[#003DB8] text-white" : "bg-gray-50 text-gray-700 hover:bg-gray-100"}
                 `,
               type: "button",
-              children: b
+              children: w
             },
-            b
+            w
           );
         }) })
       ]
@@ -5415,7 +5417,7 @@ function xc({
               modifiers: a,
               month: Te(qe(r, 1)),
               onMonthChange: (S) => {
-                const b = new Date(r), M = new Date(S).getMonth() - b.getMonth();
+                const w = new Date(r), M = new Date(S).getMonth() - w.getMonth();
                 M !== 1 && M !== -11 && o(Te(qe(S, -1)));
               },
               numberOfMonths: 1,
@@ -5539,8 +5541,8 @@ function xc({
                 mode: "range",
                 navLayout: "around",
                 selected: q || E ? void 0 : n,
-                onSelect: (S, b) => {
-                  W(S, b);
+                onSelect: (S, w) => {
+                  W(S, w);
                 },
                 modifiers: a,
                 month: r,
@@ -5630,7 +5632,7 @@ function xc({
                   modifiers: a,
                   month: Te(qe(r, 1)),
                   onMonthChange: (S) => {
-                    const b = new Date(r), M = new Date(S).getMonth() - b.getMonth();
+                    const w = new Date(r), M = new Date(S).getMonth() - w.getMonth();
                     M !== 1 && M !== -11 && o(Te(qe(S, -1)));
                   },
                   numberOfMonths: 1,
@@ -5755,17 +5757,17 @@ function xc({
               formatWeekNumber: (S) => `W${String(S).padStart(2, "0")}`
             },
             selected: n,
-            onSelect: (S, b) => {
-              O(S, b);
+            onSelect: (S, w) => {
+              O(S, w);
             },
             modifiers: a,
-            onWeekNumberClick: (S, b) => {
-              b && b.length > 0 && O(
+            onWeekNumberClick: (S, w) => {
+              w && w.length > 0 && O(
                 {
-                  from: b[0],
-                  to: b[b.length - 1]
+                  from: w[0],
+                  to: w[w.length - 1]
                 },
-                b[0]
+                w[0]
               );
             },
             month: r,
@@ -5844,7 +5846,7 @@ function xc({
           {
             selectedRange: B,
             onSelect: P,
-            activeDateField: w,
+            activeDateField: v,
             onActiveFieldChange: p,
             disabled: t
           }
@@ -5854,7 +5856,7 @@ function xc({
           {
             selectedRange: B,
             onSelect: P,
-            activeDateField: w,
+            activeDateField: v,
             onActiveFieldChange: p,
             disabled: t
           }
@@ -5924,11 +5926,11 @@ function bc({
     () => e?.startDateUtc && !e?.endDateUtc ? "end" : (!e?.startDateUtc && e?.endDateUtc, "start")
   ), [_, I] = ne(e?.duration || 1), [P, W] = ne(null), [O, B] = ne(
     e?.excludedWeekdays || []
-  ), [w, p] = ne(
+  ), [v, p] = ne(
     e?.excludedSpecificDates || []
-  ), [l, v] = ne(!1), [T, Y] = ne(o), [q, E] = ne(null), [C, Z] = ne(
+  ), [l, b] = ne(!1), [T, Y] = ne(o), [q, E] = ne(null), [C, Z] = ne(
     e?.excludedSavedDates || []
-  ), [le, N] = ne(""), [g, k] = ne(e?.excludedDateRanges || []), [S, b] = ne(() => e?.excludeEnabled ? !0 : !!(o.length > 0 || e?.excludedWeekdays && e.excludedWeekdays.length > 0 || e?.excludedSavedDates && e.excludedSavedDates.length > 0)), $ = _e(
+  ), [le, N] = ne(""), [g, k] = ne(e?.excludedDateRanges || []), [S, w] = ne(() => e?.excludeEnabled ? !0 : !!(o.length > 0 || e?.excludedWeekdays && e.excludedWeekdays.length > 0 || e?.excludedSavedDates && e.excludedSavedDates.length > 0)), $ = _e(
     (e?.excludedSavedDates && e.excludedSavedDates.length > 0 || e?.excludedDateRanges && e.excludedDateRanges.length > 0 || e?.excludedSpecificDates && e.excludedSpecificDates.length > 0) && e?.startDateUtc && e?.endDateUtc ? {
       start: e.startDateUtc,
       end: e.endDateUtc
@@ -5979,7 +5981,7 @@ function bc({
     } else
       I(1);
   }, [s, c, Ve, O]), Me(() => {
-    if (l || !s || !c || !$.current || !(C.length > 0 || w.length > 0 || g.length > 0))
+    if (l || !s || !c || !$.current || !(C.length > 0 || v.length > 0 || g.length > 0))
       return;
     const y = $.current;
     (s > y.end || c < y.start) && (Z([]), p([]), k([]), Y((A) => A.filter((V) => V === "days")), M.current && (M.current = {
@@ -5990,13 +5992,13 @@ function bc({
       excludeFilterTypes: M.current.excludeFilterTypes.filter(
         (A) => A === "days"
       )
-    }), $.current = null, b(O.length > 0));
+    }), $.current = null, w(O.length > 0));
   }, [
     s,
     c,
     l,
     C,
-    w,
+    v,
     g,
     O
   ]), Me(() => {
@@ -6037,7 +6039,7 @@ function bc({
     const u = {};
     return O.length > 0 && (u.excludedWeekday = {
       dayOfWeek: O
-    }), C.length > 0 && (u["excluded-saved-date"] = Ge), w.length > 0 && (u["excluded-specific-date"] = (y) => w.includes(de(y))), g.length > 0 && (u["excluded-range"] = (y) => {
+    }), C.length > 0 && (u["excluded-saved-date"] = Ge), v.length > 0 && (u["excluded-specific-date"] = (y) => v.includes(de(y))), g.length > 0 && (u["excluded-range"] = (y) => {
       const F = de(y);
       return g.some(
         (A) => F >= A.start && F <= A.end
@@ -6047,7 +6049,7 @@ function bc({
     C,
     O,
     Ge,
-    w,
+    v,
     g,
     P
   ]), st = $e(
@@ -6087,7 +6089,7 @@ function bc({
   ), wt = se(
     (u) => {
       if (u) {
-        v(!0), i("day");
+        b(!0), i("day");
         const y = M.current, F = Fe(
           y.excludeFilterTypes
         );
@@ -6096,9 +6098,9 @@ function bc({
         const y = M.current, F = Fe(
           y.excludeFilterTypes
         );
-        Y([...F]), B([...y.excludedWeekdays]), p([...y.excludedSpecificDates]), Z([...y.excludedSavedDates]), k([...y.excludedDateRanges]), b(
+        Y([...F]), B([...y.excludedWeekdays]), p([...y.excludedSpecificDates]), Z([...y.excludedSavedDates]), k([...y.excludedDateRanges]), w(
           F.length > 0 || y.excludedWeekdays.length > 0 || y.excludedSavedDates.length > 0
-        ), v(!1), E(null), W(null);
+        ), b(!1), E(null), W(null);
       }
     },
     [Fe]
@@ -6125,13 +6127,13 @@ function bc({
     const u = M.current, y = Fe(
       u.excludeFilterTypes
     );
-    Y([...y]), B([...u.excludedWeekdays]), p([...u.excludedSpecificDates]), Z([...u.excludedSavedDates]), k([...u.excludedDateRanges]), b(
+    Y([...y]), B([...u.excludedWeekdays]), p([...u.excludedSpecificDates]), Z([...u.excludedSavedDates]), k([...u.excludedDateRanges]), w(
       y.length > 0 || u.excludedWeekdays.length > 0 || u.excludedSavedDates.length > 0
-    ), v(!1), E(null), W(null);
+    ), b(!1), E(null), W(null);
   }, [Fe]), Mt = se(() => {
-    const u = O.length > 0, y = C.length > 0, F = g.length > 0, A = w.length > 0, V = [];
+    const u = O.length > 0, y = C.length > 0, F = g.length > 0, A = v.length > 0, V = [];
     u && V.push("days"), y && V.push("saved-dates"), F && V.push("date-range"), A && V.push("specific-date");
-    const te = u ? [...O] : [], Be = A ? [...w] : [], lt = y ? [...C] : [], Ut = F ? [...g] : [];
+    const te = u ? [...O] : [], Be = A ? [...v] : [], lt = y ? [...C] : [], Ut = F ? [...g] : [];
     M.current = {
       excludeFilterTypes: V,
       excludedWeekdays: te,
@@ -6140,12 +6142,12 @@ function bc({
       excludedDateRanges: Ut
     }, s && c && ($.current = { start: s, end: c });
     const Hr = Fe(V);
-    Y(Hr), B(te), p(Be), Z(lt), k(Ut), b(V.length > 0), v(!1), E(null), W(null);
+    Y(Hr), B(te), p(Be), Z(lt), k(Ut), w(V.length > 0), b(!1), E(null), W(null);
   }, [
     g,
     C,
     O,
-    w,
+    v,
     Fe,
     s,
     c
@@ -6235,21 +6237,21 @@ function bc({
         excludedSpecificDates: A,
         excludedSavedDates: V,
         excludedDateRanges: te
-      }, b(
+      }, w(
         F.length > 0 || y.length > 0 || V.length > 0
-      ), v(!1), E(null), u.startDateUtc && we(u.startDateUtc);
+      ), b(!1), E(null), u.startDateUtc && we(u.startDateUtc);
     },
     [l, we]
   ), Ce = se(() => {
     l || (d(r), m(r), B([]), D("start"), we(r));
   }, [l, r, we]), ue = se(() => {
-    l || (d(""), m(""), I(1), B([]), D("start"), v(!1), Y([]), p([]), Z([]), k([]), E(null), M.current = {
+    l || (d(""), m(""), I(1), B([]), D("start"), b(!1), Y([]), p([]), Z([]), k([]), E(null), M.current = {
       excludeFilterTypes: [],
       excludedWeekdays: [],
       excludedSpecificDates: [],
       excludedSavedDates: [],
       excludedDateRanges: []
-    }, b(!1), we(r));
+    }, w(!1), we(r));
   }, [l, r, we]), Lt = se(() => {
     if (l || Le) return;
     if (tt) {
@@ -6263,7 +6265,7 @@ function bc({
       O,
       S,
       T,
-      w,
+      v,
       C,
       g
     );
@@ -6275,7 +6277,7 @@ function bc({
     T,
     g,
     C,
-    w,
+    v,
     O,
     tt,
     Le,
@@ -6458,7 +6460,7 @@ function bc({
     activeDateField: f,
     duration: _,
     excludedWeekdays: O,
-    excludedSpecificDates: w,
+    excludedSpecificDates: v,
     excludeEnabled: l,
     excludeFilterTypes: T,
     activeFilterView: q,
@@ -6545,10 +6547,10 @@ function Wc({
     excludedSavedDates: W,
     savedDatesSearchTerm: O,
     excludedDateRanges: B,
-    displayedMonth: w,
+    displayedMonth: v,
     monthsViewIndex: p,
     monthsViewYear: l,
-    yearsViewIndex: v,
+    yearsViewIndex: b,
     yearsViewDecade: T,
     excludeApplied: Y,
     hasFutureDates: q,
@@ -6560,7 +6562,7 @@ function Wc({
     savedDatesForFilter: g,
     filteredSavedDates: k,
     dayPickerDisabledMatcher: S,
-    getFutureDateWarning: b,
+    getFutureDateWarning: w,
     setActiveDateField: $,
     setSavedDatesSearchTerm: M,
     setMonthsViewIndex: R,
@@ -6620,7 +6622,7 @@ function Wc({
     D,
     W,
     B
-  ), J = b();
+  ), J = w();
   return /* @__PURE__ */ H(
     "div",
     {
@@ -6709,7 +6711,7 @@ function Wc({
                     unit: a,
                     excludeEnabled: _,
                     selectedRange: Z,
-                    displayedMonth: w,
+                    displayedMonth: v,
                     setDisplayedMonth: x,
                     dayPickerModifiers: C,
                     dayPickerDisabledMatcher: S,
@@ -6717,7 +6719,7 @@ function Wc({
                     setMonthsViewIndex: R,
                     monthsViewYear: l,
                     setMonthsViewYear: ee,
-                    yearsViewIndex: v,
+                    yearsViewIndex: b,
                     setYearsViewIndex: G,
                     yearsViewDecade: T,
                     setYearsViewDecade: oe,
