@@ -7,7 +7,7 @@ function App() {
   const [showPicker, setShowPicker] = useState(false);
   const [dateRange, setDateRange] = useState<DateRangeSelection | null>(null);
 
-  const handleApply = (selection: DateRangeSelection) => {
+  const handleApply = (selection: DateRangeSelection | null) => {
     setDateRange(selection);
     setShowPicker(false);
     console.log("Selected range:", selection);
@@ -73,6 +73,7 @@ function App() {
                 // themeColors={{
                 //   background: "#eff6ff",
                 // }}
+                allowClear={true}
               />
             </div>
           )}

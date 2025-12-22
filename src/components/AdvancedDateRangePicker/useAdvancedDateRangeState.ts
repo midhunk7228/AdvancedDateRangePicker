@@ -53,12 +53,14 @@ interface ExcludeSavedState {
 
 interface UseAdvancedDateRangeStateParams {
   initialSelection?: Partial<DateRangeSelection>;
-  onApply: (selection: DateRangeSelection) => void;
+  onApply: (selection: DateRangeSelection | null) => void;
+  allowClear?: boolean;
 }
 
 export function useAdvancedDateRangeState({
   initialSelection,
   onApply,
+  allowClear,
 }: UseAdvancedDateRangeStateParams) {
   const today = getTodayUtc();
 
@@ -119,10 +121,10 @@ export function useAdvancedDateRangeState({
     }
     return Boolean(
       initialSupportedExcludeFilterTypes.length > 0 ||
-        (initialSelection?.excludedWeekdays &&
-          initialSelection.excludedWeekdays.length > 0) ||
-        (initialSelection?.excludedSavedDates &&
-          initialSelection.excludedSavedDates.length > 0)
+      (initialSelection?.excludedWeekdays &&
+        initialSelection.excludedWeekdays.length > 0) ||
+      (initialSelection?.excludedSavedDates &&
+        initialSelection.excludedSavedDates.length > 0)
     );
   });
 
@@ -497,9 +499,9 @@ export function useAdvancedDateRangeState({
     () =>
       Boolean(
         !startDateUtc ||
-          startDateUtc.trim() === "" ||
-          !endDateUtc ||
-          endDateUtc.trim() === ""
+        startDateUtc.trim() === "" ||
+        !endDateUtc ||
+        endDateUtc.trim() === ""
       ),
     [endDateUtc, startDateUtc]
   );
@@ -549,8 +551,8 @@ export function useAdvancedDateRangeState({
         setExcludedDateRanges([...savedState.excludedDateRanges]);
         setExcludeApplied(
           sanitizedTypes.length > 0 ||
-            savedState.excludedWeekdays.length > 0 ||
-            savedState.excludedSavedDates.length > 0
+          savedState.excludedWeekdays.length > 0 ||
+          savedState.excludedSavedDates.length > 0
         );
         setExcludeEnabled(false);
         setActiveFilterView(null);
@@ -614,8 +616,8 @@ export function useAdvancedDateRangeState({
     setExcludedDateRanges([...savedState.excludedDateRanges]);
     setExcludeApplied(
       sanitizedTypes.length > 0 ||
-        savedState.excludedWeekdays.length > 0 ||
-        savedState.excludedSavedDates.length > 0
+      savedState.excludedWeekdays.length > 0 ||
+      savedState.excludedSavedDates.length > 0
     );
     setExcludeEnabled(false);
     setActiveFilterView(null);
@@ -872,8 +874,8 @@ export function useAdvancedDateRangeState({
       };
       setExcludeApplied(
         restoredTypes.length > 0 ||
-          restoredWeekdays.length > 0 ||
-          restoredSavedDates.length > 0
+        restoredWeekdays.length > 0 ||
+        restoredSavedDates.length > 0
       );
       setExcludeEnabled(false);
       setActiveFilterView(null);
@@ -921,7 +923,14 @@ export function useAdvancedDateRangeState({
   }, [excludeEnabled, today, updateDisplayedMonth]);
 
   const handleApply = useCallback(() => {
-    if (excludeEnabled || hasEmptyDates || hasFutureDates) return;
+    if (excludeEnabled || hasFutureDates) return;
+
+    if (hasEmptyDates) {
+      if (allowClear) {
+        onApply(null);
+      }
+      return;
+    }
 
     const selection = createSelection(
       startDateUtc,
@@ -949,6 +958,7 @@ export function useAdvancedDateRangeState({
     onApply,
     startDateUtc,
     unit,
+    allowClear,
   ]);
 
   const handleCalendarSelect = useCallback(
@@ -1039,9 +1049,9 @@ export function useAdvancedDateRangeState({
           if (activeDateField === "start") {
             if (
               parseUtc(formatUtc(dayPickerProps)).getTime() >
-                parseUtc(endDateUtc).getTime() &&
+              parseUtc(endDateUtc).getTime() &&
               parseUtc(formatUtc(dayPickerProps)).getTime() >
-                parseUtc(startDateUtc).getTime()
+              parseUtc(startDateUtc).getTime()
             ) {
               weekStartFrom = startOfWeek(dayPickerProps, {
                 weekStartsOn:
@@ -1052,9 +1062,9 @@ export function useAdvancedDateRangeState({
               handleCalendarSelect({ from: weekStartFrom, to: weekEndFrom });
             } else if (
               parseUtc(formatUtc(dayPickerProps)).getTime() <
-                parseUtc(endDateUtc).getTime() &&
+              parseUtc(endDateUtc).getTime() &&
               parseUtc(formatUtc(dayPickerProps)).getTime() <
-                parseUtc(startDateUtc).getTime()
+              parseUtc(startDateUtc).getTime()
             ) {
               weekStartFrom = startOfWeek(dayPickerProps, {
                 weekStartsOn:
@@ -1070,9 +1080,9 @@ export function useAdvancedDateRangeState({
               handleCalendarSelect({ from: weekStartFrom, to: weekEndTo });
             } else if (
               parseUtc(formatUtc(dayPickerProps)).getTime() >
-                parseUtc(startDateUtc).getTime() &&
+              parseUtc(startDateUtc).getTime() &&
               parseUtc(formatUtc(dayPickerProps)).getTime() <
-                parseUtc(endDateUtc).getTime()
+              parseUtc(endDateUtc).getTime()
             ) {
               weekStartFrom = startOfWeek(dayPickerProps, {
                 weekStartsOn:
@@ -1114,9 +1124,9 @@ export function useAdvancedDateRangeState({
               handleCalendarSelect({ from: weekStartFrom, to: weekEndTo });
             } else if (
               parseUtc(formatUtc(dayPickerProps)).getTime() <
-                parseUtc(endDateUtc).getTime() &&
+              parseUtc(endDateUtc).getTime() &&
               parseUtc(formatUtc(dayPickerProps)).getTime() <
-                parseUtc(startDateUtc).getTime()
+              parseUtc(startDateUtc).getTime()
             ) {
               weekStartFrom = startOfWeek(dayPickerProps, {
                 weekStartsOn:
